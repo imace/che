@@ -8,30 +8,18 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.factory.shared.dto;
-
-import org.eclipse.che.api.core.factory.FactoryParameter;
-import org.eclipse.che.dto.shared.DTO;
+package org.eclipse.che.api.factory.shared.model;
 
 import java.util.List;
 
-import static org.eclipse.che.api.core.factory.FactoryParameter.Obligation.OPTIONAL;
-
 /**
- * Describe IDE look and feel on application closed event.
+ * Describe IDE look and feel on application loaded event.
  *
- * @author Sergii Kabashniuk
+ * @author Anton Korneta
  */
-@DTO
-public interface OnAppClosed {
-
+public interface OnAppLoaded {
     /**
      * @return actions for current event.
      */
-    @FactoryParameter(obligation = OPTIONAL)
-    List<Action> getActions();
-
-    void setActions(List<Action> actions);
-
-    OnAppClosed withActions(List<Action> actions);
+    List<? extends Action> getActions();
 }

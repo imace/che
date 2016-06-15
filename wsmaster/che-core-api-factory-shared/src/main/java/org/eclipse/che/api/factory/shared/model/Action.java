@@ -8,16 +8,24 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.factory.server;
+package org.eclipse.che.api.factory.shared.model;
 
-import org.eclipse.che.api.core.ApiException;
-import org.eclipse.che.api.factory.shared.dto.FactoryDto;
+import java.util.Map;
 
 /**
- * Convert legacy factory parameter to new the latest format
+ * Defines ide action model.
  *
- * @author Alexander Garagatyi
+ * @author Anton Korneta
  */
-public interface LegacyConverter {
-    void convert(FactoryDto factory) throws ApiException;
+public interface Action {
+
+    /**
+     * Returns the identifier of this action instance.
+     */
+    String getId();
+
+    /**
+     * Returns properties of this action instance.
+     */
+    Map<String, String> getProperties();
 }

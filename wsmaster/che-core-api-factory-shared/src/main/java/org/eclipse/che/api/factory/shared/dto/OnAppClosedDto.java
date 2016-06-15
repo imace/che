@@ -10,40 +10,29 @@
  *******************************************************************************/
 package org.eclipse.che.api.factory.shared.dto;
 
-import static org.eclipse.che.api.core.factory.FactoryParameter.Obligation.OPTIONAL;
-
 import org.eclipse.che.api.core.factory.FactoryParameter;
+import org.eclipse.che.api.factory.shared.model.OnAppClosed;
 import org.eclipse.che.dto.shared.DTO;
 
-import java.util.Map;
+import java.util.List;
+
+import static org.eclipse.che.api.core.factory.FactoryParameter.Obligation.OPTIONAL;
 
 /**
- * Describe ide action.
+ * Describe IDE look and feel on application closed event.
  *
  * @author Sergii Kabashniuk
  */
 @DTO
-public interface Action {
+public interface OnAppClosedDto extends OnAppClosed {
+
     /**
-     * Action Id
-     *
-     * @return id of action.
+     * @return actions for current event.
      */
     @FactoryParameter(obligation = OPTIONAL)
-    String getId();
+    List<IdeActionDto> getActions();
 
-    void setId(String id);
+    void setActions(List<IdeActionDto> actions);
 
-    Action withId(String id);
-
-    /***
-     *
-     * @return Action properties
-     */
-    @FactoryParameter(obligation = OPTIONAL)
-    Map<String, String> getProperties();
-
-    void setProperties(Map<String, String> properties);
-
-    Action withProperties(Map<String, String> properties);
+    OnAppClosedDto withActions(List<IdeActionDto> actions);
 }

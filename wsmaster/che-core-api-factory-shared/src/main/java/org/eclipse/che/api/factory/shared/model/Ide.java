@@ -8,16 +8,26 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.factory.server;
-
-import org.eclipse.che.api.core.ApiException;
-import org.eclipse.che.api.factory.shared.dto.FactoryDto;
+package org.eclipse.che.api.factory.shared.model;
 
 /**
- * Convert legacy factory parameter to new the latest format
+ * Describe IDE interface Look and Feel
  *
- * @author Alexander Garagatyi
+ * @author Anton Korneta
  */
-public interface LegacyConverter {
-    void convert(FactoryDto factory) throws ApiException;
+public interface Ide {
+    /**
+     * @return configuration of IDE on application loaded event.
+     */
+    OnAppLoaded getOnAppLoaded();
+
+    /**
+     * @return configuration of IDE on application closed event.
+     */
+    OnAppClosed getOnAppClosed();
+
+    /**
+     * @return configuration of IDE on projects loaded event.
+     */
+    OnProjectsLoaded getOnProjectsLoaded();
 }

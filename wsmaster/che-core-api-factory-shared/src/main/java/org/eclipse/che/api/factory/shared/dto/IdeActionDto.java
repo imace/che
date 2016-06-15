@@ -10,41 +10,42 @@
  *******************************************************************************/
 package org.eclipse.che.api.factory.shared.dto;
 
-import org.eclipse.che.api.core.factory.FactoryParameter;
-import org.eclipse.che.dto.shared.DTO;
-
 import static org.eclipse.che.api.core.factory.FactoryParameter.Obligation.OPTIONAL;
 
+import org.eclipse.che.api.core.factory.FactoryParameter;
+import org.eclipse.che.api.factory.shared.model.Action;
+import org.eclipse.che.dto.shared.DTO;
+
+import java.util.Map;
+
 /**
- * @author Alexander Garagatyi
+ * Describe ide action.
+ *
+ * @author Sergii Kabashniuk
  */
 @DTO
-public interface ButtonAttributes {
+public interface IdeActionDto extends Action {
+
+    /**
+     * Action Id
+     *
+     * @return id of action.
+     */
     @FactoryParameter(obligation = OPTIONAL)
-    String getColor();
+    String getId();
 
-    void setColor(String color);
+    void setId(String id);
 
-    ButtonAttributes withColor(String color);
+    IdeActionDto withId(String id);
 
+    /***
+     *
+     * @return Action properties
+     */
     @FactoryParameter(obligation = OPTIONAL)
-    Boolean getCounter();
+    Map<String, String> getProperties();
 
-    void setCounter(Boolean counter);
+    void setProperties(Map<String, String> properties);
 
-    ButtonAttributes withCounter(Boolean counter);
-
-    @FactoryParameter(obligation = OPTIONAL)
-    String getLogo();
-
-    void setLogo(String logo);
-
-    ButtonAttributes withLogo(String logo);
-
-    @FactoryParameter(obligation = OPTIONAL)
-    String getStyle();
-
-    void setStyle(String style);
-
-    ButtonAttributes withStyle(String style);
+    IdeActionDto withProperties(Map<String, String> properties);
 }

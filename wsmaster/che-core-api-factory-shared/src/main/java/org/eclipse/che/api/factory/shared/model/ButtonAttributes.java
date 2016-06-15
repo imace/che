@@ -8,16 +8,17 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.factory.server;
-
-import org.eclipse.che.api.core.ApiException;
-import org.eclipse.che.api.factory.shared.dto.FactoryDto;
+package org.eclipse.che.api.factory.shared.model;
 
 /**
- * Convert legacy factory parameter to new the latest format
- *
- * @author Alexander Garagatyi
+ * @author @author Anton Korneta
  */
-public interface LegacyConverter {
-    void convert(FactoryDto factory) throws ApiException;
+public interface ButtonAttributes {
+    String getColor();
+
+    Boolean getCounter();
+
+    String getLogo();
+
+    String getStyle();
 }

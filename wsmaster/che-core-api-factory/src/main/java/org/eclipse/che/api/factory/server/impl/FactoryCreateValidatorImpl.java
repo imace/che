@@ -14,7 +14,7 @@ import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.factory.server.FactoryCreateValidator;
-import org.eclipse.che.api.factory.shared.dto.Factory;
+import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.user.server.spi.PreferenceDao;
 import org.eclipse.che.api.workspace.server.WorkspaceValidator;
 
@@ -36,7 +36,9 @@ public class FactoryCreateValidatorImpl extends FactoryBaseValidator implements 
     }
 
     @Override
-    public void validateOnCreate(Factory factory) throws BadRequestException, ServerException, ForbiddenException {
+    public void validateOnCreate(FactoryDto factory) throws BadRequestException,
+                                                            ServerException,
+                                                            ForbiddenException {
         validateProjects(factory);
         validateAccountId(factory);
         validateCurrentTimeAfterSinceUntil(factory);

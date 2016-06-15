@@ -8,16 +8,32 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.factory.server;
-
-import org.eclipse.che.api.core.ApiException;
-import org.eclipse.che.api.factory.shared.dto.FactoryDto;
+package org.eclipse.che.api.factory.shared.model;
 
 /**
- * Convert legacy factory parameter to new the latest format
+ * Describes author of the factory
  *
- * @author Alexander Garagatyi
+ * @author Anton Korneta
  */
-public interface LegacyConverter {
-    void convert(FactoryDto factory) throws ApiException;
+public interface Author {
+
+    /**
+     * Name of the author
+     */
+    String getName();
+
+    /**
+     * Email of the author
+     */
+    String getEmail();
+
+    /**
+     * Id of user that create factory, set by the server
+     */
+    String getUserId();
+
+    /**
+     * @return Creation time of factory, set by the server (in milliseconds, from Unix epoch, no timezone)
+     */
+    Long getCreated();
 }

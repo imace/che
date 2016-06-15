@@ -16,7 +16,7 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.factory.shared.dto.Factory;
+import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
@@ -84,7 +84,7 @@ public class AppContextImpl implements AppContext,
 
     private WorkspaceDto        usersWorkspaceDto;
     private CurrentUser         currentUser;
-    private Factory             factory;
+    private FactoryDto          factory;
     private DevMachine          devMachine;
     private Path                projectsRoot;
     /**
@@ -168,11 +168,12 @@ public class AppContextImpl implements AppContext,
     }
 
     @Override
-    public Factory getFactory() {
+    public FactoryDto getFactory() {
         return factory;
     }
 
-    public void setFactory(Factory factory) {
+    @Override
+    public void setFactory(FactoryDto factory) {
         this.factory = factory;
     }
 

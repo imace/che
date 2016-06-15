@@ -11,6 +11,7 @@
 package org.eclipse.che.api.factory.shared.dto;
 
 import org.eclipse.che.api.core.factory.FactoryParameter;
+import org.eclipse.che.api.factory.shared.model.Author;
 import org.eclipse.che.dto.shared.DTO;
 
 import static org.eclipse.che.api.core.factory.FactoryParameter.Obligation.OPTIONAL;
@@ -21,7 +22,8 @@ import static org.eclipse.che.api.core.factory.FactoryParameter.Obligation.OPTIO
  * @author Alexander Garagatyi
  */
 @DTO
-public interface Author {
+public interface AuthorDto extends Author {
+
     /**
      * Name of the author
      */
@@ -30,7 +32,7 @@ public interface Author {
 
     void setName(String name);
 
-    Author withName(String name);
+    AuthorDto withName(String name);
 
     /**
      * Email of the author
@@ -40,7 +42,7 @@ public interface Author {
 
     void setEmail(String email);
 
-    Author withEmail(String email);
+    AuthorDto withEmail(String email);
 
     /**
      * Id of user that create factory, set by the server
@@ -50,7 +52,7 @@ public interface Author {
 
     void setUserId(String userId);
 
-    Author withUserId(String userId);
+    AuthorDto withUserId(String userId);
 
     /**
      * @return Creation time of factory, set by the server (in milliseconds, from Unix epoch, no timezone)
@@ -60,5 +62,5 @@ public interface Author {
 
     void setCreated(Long created);
 
-    Author withCreated(Long created);
+    AuthorDto withCreated(Long created);
 }

@@ -12,7 +12,7 @@ package org.eclipse.che.ide.api.app;
 
 import com.google.common.annotations.Beta;
 
-import org.eclipse.che.api.factory.shared.dto.Factory;
+import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.resources.Container;
@@ -175,12 +175,15 @@ public interface AppContext {
     void setStartUpActions(List<StartUpAction> startUpActions);
 
     /**
-     * Returns {@link Factory} instance which id was set on startup, or {@code null} if no factory was specified.
+     * Returns {@link FactoryDto} instance which id was set on startup,
+     * or {@code null} if no factory was specified.
      *
      * @return loaded factory or {@code null}
      */
-    Factory getFactory();
+    FactoryDto getFactory();
 
+    void setFactory(FactoryDto factory);
+    
     String getWorkspaceId();
 
     /* Deprecated methods */
