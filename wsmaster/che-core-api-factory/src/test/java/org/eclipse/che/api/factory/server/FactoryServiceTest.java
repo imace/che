@@ -88,6 +88,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
@@ -372,6 +373,7 @@ public class FactoryServiceTest {
 //        assertNotEquals(responseFactory.withLinks(emptyList()), asDto(existed));
 //        verify(factoryManager).updateFactory(eq(update), any());
 //    }
+
 //
 //    /**
 //     * Checks that the user can not update an unknown existing factory
@@ -1437,20 +1439,4 @@ public class FactoryServiceTest {
         assertNotNull(res);
         return Paths.get(res.toURI());
     }
-
-//    private class FactorySaveAnswer implements Answer<Object> {
-//
-//        private FactoryDto savedFactory;
-//
-//        @Override
-//        public Object answer(InvocationOnMock invocation) throws Throwable {
-//            if (savedFactory == null) {
-//                savedFactory = (FactoryDto)invocation.getArguments()[0];
-//                return FACTORY_ID;
-//            }
-//            FactoryDto clone = DTO.clone(savedFactory);
-//            assertNotNull(clone);
-//            return clone.withId(FACTORY_ID);
-//        }
-//    }
 }

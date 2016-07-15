@@ -13,6 +13,10 @@ package org.eclipse.che.api.factory.server.model.impl;
 import org.eclipse.che.api.factory.shared.model.Action;
 import org.eclipse.che.api.factory.shared.model.OnAppLoaded;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,9 +26,19 @@ import java.util.List;
  * @author Anton Korneta
  */
 import static java.util.stream.Collectors.toList;
+import static javax.persistence.CascadeType.ALL;
 
+@Entity(name = "OnAppLoaded")
 public class OnAppLoadedImpl implements OnAppLoaded {
+
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    @OneToMany(cascade = ALL, orphanRemoval = true)
     private List<ActionImpl> actions;
+
+    public OnAppLoadedImpl() {}
 
     public OnAppLoadedImpl(List<? extends Action> actions) {
         if (actions != null) {
@@ -44,6 +58,10 @@ public class OnAppLoadedImpl implements OnAppLoaded {
             return new ArrayList<>();
         }
         return actions;
+    }
+
+    public void setActions(List<ActionImpl> actions) {
+        this.actions = actions;
     }
 
     @Override

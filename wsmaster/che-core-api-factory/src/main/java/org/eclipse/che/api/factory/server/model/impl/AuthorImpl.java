@@ -11,7 +11,14 @@
 package org.eclipse.che.api.factory.server.model.impl;
 
 import org.eclipse.che.api.factory.shared.model.Author;
+import org.eclipse.che.api.user.server.model.impl.UserImpl;
 
+import javax.persistence.Basic;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import java.util.Objects;
 
 /**
@@ -19,12 +26,33 @@ import java.util.Objects;
  *
  * @author Anton Korneta
  */
+@Entity(name = "Author")
 public class AuthorImpl implements Author {
 
-    private Long   created;
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    @Basic
+    private Long created;
+
+    @Basic
     private String name;
+
+    @Basic
     private String userId;
+
+    @ManyToOne
+    @JoinColumn(insertable = false,
+                updatable = false,
+                name = "userId",
+                referencedColumnName = "id")
+    private UserImpl userEntity;
+
+    @Basic
     private String email;
+
+    public AuthorImpl() {}
 
     public AuthorImpl(Long created,
                       String name,
@@ -48,9 +76,17 @@ public class AuthorImpl implements Author {
         return created;
     }
 
+    public void setCreated(Long created) {
+        this.created = created;
+    }
+
     @Override
     public String getName() {
         return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     @Override
@@ -58,9 +94,17 @@ public class AuthorImpl implements Author {
         return userId;
     }
 
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
     @Override
     public String getEmail() {
         return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     @Override

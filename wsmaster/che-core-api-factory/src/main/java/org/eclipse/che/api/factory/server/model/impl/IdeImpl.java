@@ -11,10 +11,12 @@
 package org.eclipse.che.api.factory.server.model.impl;
 
 import org.eclipse.che.api.factory.shared.model.Ide;
-import org.eclipse.che.api.factory.shared.model.OnAppClosed;
-import org.eclipse.che.api.factory.shared.model.OnAppLoaded;
-import org.eclipse.che.api.factory.shared.model.OnProjectsLoaded;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.OneToOne;
 import java.util.Objects;
 
 /**
@@ -22,10 +24,23 @@ import java.util.Objects;
  *
  * @author Anton Korneta
  */
+@Entity(name = "Ide")
 public class IdeImpl implements Ide {
-    private OnAppLoadedImpl      onAppLoaded;
+
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    private OnAppLoadedImpl onAppLoaded;
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private OnProjectsLoadedImpl onProjectsLoaded;
-    private OnAppClosedImpl      onAppClosed;
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    private OnAppClosedImpl onAppClosed;
+
+    public IdeImpl() {}
 
     public IdeImpl(OnAppLoadedImpl onAppLoaded,
                    OnProjectsLoadedImpl onProjectsLoaded,
@@ -42,18 +57,30 @@ public class IdeImpl implements Ide {
     }
 
     @Override
-    public OnAppLoaded getOnAppLoaded() {
+    public OnAppLoadedImpl getOnAppLoaded() {
         return onAppLoaded;
     }
 
-    @Override
-    public OnProjectsLoaded getOnProjectsLoaded() {
-        return onProjectsLoaded;
+    public void setOnAppLoaded(OnAppLoadedImpl onAppLoaded) {
+        this.onAppLoaded = onAppLoaded;
     }
 
     @Override
-    public OnAppClosed getOnAppClosed() {
+    public OnProjectsLoadedImpl getOnProjectsLoaded() {
+        return onProjectsLoaded;
+    }
+
+    public void setOnProjectsLoaded(OnProjectsLoadedImpl onProjectsLoaded) {
+        this.onProjectsLoaded = onProjectsLoaded;
+    }
+
+    @Override
+    public OnAppClosedImpl getOnAppClosed() {
         return onAppClosed;
+    }
+
+    public void setOnAppClosed(OnAppClosedImpl onAppClosed) {
+        this.onAppClosed = onAppClosed;
     }
 
     @Override

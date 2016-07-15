@@ -12,6 +12,11 @@ package org.eclipse.che.api.factory.server.model.impl;
 
 import org.eclipse.che.api.factory.shared.model.Action;
 
+import javax.persistence.Basic;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -21,10 +26,20 @@ import java.util.Objects;
  *
  * @author Anton Korneta
  */
+@Entity(name = "Action")
 public class ActionImpl implements Action {
 
-    private final String              id;
-    private       Map<String, String> properties;
+    @Id
+    @GeneratedValue
+    private Long entityId;
+
+    @Basic
+    private String id;
+
+    @ElementCollection
+    private Map<String, String> properties;
+
+    public ActionImpl() {}
 
     public ActionImpl(String id, Map<String, String> properties) {
         this.id = id;
@@ -40,12 +55,20 @@ public class ActionImpl implements Action {
         return id;
     }
 
+    public void setId(String id) {
+        this.id = id;
+    }
+
     @Override
     public Map<String, String> getProperties() {
         if (properties == null) {
             return new HashMap<>();
         }
         return properties;
+    }
+
+    public void setProperties(Map<String, String> properties) {
+        this.properties = properties;
     }
 
     @Override

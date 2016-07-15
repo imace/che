@@ -12,6 +12,8 @@ package org.eclipse.che.api.factory.server.model.impl;
 
 import org.eclipse.che.api.factory.shared.model.ButtonAttributes;
 
+import javax.persistence.Basic;
+import javax.persistence.Embeddable;
 import java.util.Objects;
 
 /**
@@ -19,12 +21,22 @@ import java.util.Objects;
  *
  * @author Anton Korneta
  */
+@Embeddable
 public class ButtonAttributesImpl implements ButtonAttributes {
 
-    private String  color;
-    private String  logo;
-    private String  style;
+    @Basic
+    private String color;
+
+    @Basic
+    private String logo;
+
+    @Basic
+    private String style;
+
+    @Basic
     private Boolean counter;
+
+    public ButtonAttributesImpl() {}
 
     public ButtonAttributesImpl(String color,
                                 String logo,
@@ -48,9 +60,17 @@ public class ButtonAttributesImpl implements ButtonAttributes {
         return color;
     }
 
+    public void setColor(String color) {
+        this.color = color;
+    }
+
     @Override
     public String getLogo() {
         return logo;
+    }
+
+    public void setLogo(String logo) {
+        this.logo = logo;
     }
 
     @Override
@@ -58,9 +78,17 @@ public class ButtonAttributesImpl implements ButtonAttributes {
         return style;
     }
 
+    public void setStyle(String style) {
+        this.style = style;
+    }
+
     @Override
     public Boolean getCounter() {
         return counter;
+    }
+
+    public void setCounter(Boolean counter) {
+        this.counter = counter;
     }
 
     @Override

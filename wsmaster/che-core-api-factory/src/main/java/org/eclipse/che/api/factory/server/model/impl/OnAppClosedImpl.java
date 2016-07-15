@@ -13,18 +13,32 @@ package org.eclipse.che.api.factory.server.model.impl;
 import org.eclipse.che.api.factory.shared.model.Action;
 import org.eclipse.che.api.factory.shared.model.OnAppClosed;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
+import static javax.persistence.CascadeType.ALL;
 
 /**
  * Data object for {@link OnAppClosed}.
  *
  * @author Anton Korneta
  */
+@Entity(name = "OnAppClosed")
 public class OnAppClosedImpl implements OnAppClosed {
+
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    @OneToMany(cascade = ALL, orphanRemoval = true)
     private List<ActionImpl> actions;
+
+    public OnAppClosedImpl() {}
 
     public OnAppClosedImpl(List<? extends Action> actions) {
         if (actions != null) {
@@ -44,6 +58,10 @@ public class OnAppClosedImpl implements OnAppClosed {
             return new ArrayList<>();
         }
         return actions;
+    }
+
+    public void setActions(List<ActionImpl> actions) {
+        this.actions = actions;
     }
 
     @Override

@@ -255,10 +255,9 @@ public class FactoryService extends Service {
                                                                 .stream()
                                                                 .filter(param -> !skip.contains(param.getKey())
                                                                                  && !param.getValue().isEmpty())
-                                                                .map(entry -> Pair.of(entry.getKey(),
-                                                                                      entry.getValue()
-                                                                                           .iterator()
-                                                                                           .next()))
+                                                                .map(entry -> Pair.of(entry.getKey(), entry.getValue()
+                                                                                                           .iterator()
+                                                                                                           .next()))
                                                                 .collect(toList());
         if (query.isEmpty()) {
             throw new BadRequestException("Query must contain at least one attribute");

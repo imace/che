@@ -12,19 +12,27 @@ package org.eclipse.che.api.factory.server;
 
 import org.eclipse.che.api.core.ConflictException;
 
+import javax.persistence.Basic;
+import javax.persistence.Embeddable;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 
 /** Class to hold image information such as data, name, media type */
+@Embeddable
 public class FactoryImage {
+
+    @Basic
     private byte[] imageData;
+
+    @Basic
     private String mediaType;
+
+    @Basic
     private String name;
 
-    public FactoryImage() {
-    }
+    public FactoryImage() {}
 
     public FactoryImage(byte[] data, String mediaType, String name) {
         setMediaType(mediaType);

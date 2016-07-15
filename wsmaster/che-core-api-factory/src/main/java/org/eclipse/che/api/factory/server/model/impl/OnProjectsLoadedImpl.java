@@ -13,6 +13,11 @@ package org.eclipse.che.api.factory.server.model.impl;
 import org.eclipse.che.api.factory.shared.model.Action;
 import org.eclipse.che.api.factory.shared.model.OnProjectsLoaded;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,9 +28,17 @@ import static java.util.stream.Collectors.toList;
  *
  * @author Anton Korneta
  */
+@Entity(name = "OnProjectsLoaded")
 public class OnProjectsLoadedImpl implements OnProjectsLoaded {
 
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ActionImpl> actions;
+
+    public OnProjectsLoadedImpl() {}
 
     public OnProjectsLoadedImpl(List<? extends Action> actions) {
         if (actions != null) {
@@ -45,6 +58,10 @@ public class OnProjectsLoadedImpl implements OnProjectsLoaded {
             return new ArrayList<>();
         }
         return actions;
+    }
+
+    public void setActions(List<ActionImpl> actions) {
+        this.actions = actions;
     }
 
     @Override

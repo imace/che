@@ -11,8 +11,13 @@
 package org.eclipse.che.api.factory.server.model.impl;
 
 import org.eclipse.che.api.factory.shared.model.Button;
-import org.eclipse.che.api.factory.shared.model.ButtonAttributes;
 
+import javax.persistence.Embedded;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 import java.util.Objects;
 
 /**
@@ -20,10 +25,18 @@ import java.util.Objects;
  *
  * @author Anton Korneta
  */
+@Entity(name = "Button")
 public class ButtonImpl implements Button {
 
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    @Embedded
     private ButtonAttributesImpl attributes;
-    private ButtonType           type;
+
+    @Enumerated(EnumType.STRING)
+    private ButtonType type;
 
     public ButtonImpl(ButtonAttributesImpl attributes,
                       ButtonType type) {
@@ -31,18 +44,28 @@ public class ButtonImpl implements Button {
         this.type = type;
     }
 
+    public ButtonImpl() {}
+
     public ButtonImpl(Button button) {
         this(new ButtonAttributesImpl(button.getAttributes()), button.getType());
     }
 
     @Override
-    public ButtonAttributes getAttributes() {
+    public ButtonAttributesImpl getAttributes() {
         return attributes;
+    }
+
+    public void setAttributes(ButtonAttributesImpl attributes) {
+        this.attributes = attributes;
     }
 
     @Override
     public ButtonType getType() {
         return type;
+    }
+
+    public void setType(ButtonType type) {
+        this.type = type;
     }
 
     @Override

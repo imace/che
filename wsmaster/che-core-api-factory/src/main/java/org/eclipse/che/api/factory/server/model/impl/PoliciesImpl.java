@@ -12,6 +12,8 @@ package org.eclipse.che.api.factory.server.model.impl;
 
 import org.eclipse.che.api.factory.shared.model.Policies;
 
+import javax.persistence.Basic;
+import javax.persistence.Embeddable;
 import java.util.Objects;
 
 /**
@@ -19,17 +21,25 @@ import java.util.Objects;
  *
  * @author Anton Korneta
  */
+@Embeddable
 public class PoliciesImpl implements Policies {
 
-    public static PoliciesImplBuilder builder() {
-        return new PoliciesImplBuilder();
-    }
-
+    @Basic
     private String referer;
+
+    @Basic
     private String match;
+
+    @Basic
     private String create;
-    private Long   until;
-    private Long   since;
+
+    @Basic
+    private Long until;
+
+    @Basic
+    private Long since;
+
+    public PoliciesImpl() {}
 
     public PoliciesImpl(String referer,
                         String match,
@@ -56,9 +66,17 @@ public class PoliciesImpl implements Policies {
         return referer;
     }
 
+    public void setReferer(String referer) {
+        this.referer = referer;
+    }
+
     @Override
     public String getMatch() {
         return match;
+    }
+
+    public void setMatch(String match) {
+        this.match = match;
     }
 
     @Override
@@ -66,14 +84,26 @@ public class PoliciesImpl implements Policies {
         return create;
     }
 
+    public void setCreate(String create) {
+        this.create = create;
+    }
+
     @Override
     public Long getUntil() {
         return until;
     }
 
+    public void setUntil(Long until) {
+        this.until = until;
+    }
+
     @Override
     public Long getSince() {
         return since;
+    }
+
+    public void setSince(Long since) {
+        this.since = since;
     }
 
     @Override
@@ -108,48 +138,5 @@ public class PoliciesImpl implements Policies {
                ", until=" + until +
                ", since=" + since +
                '}';
-    }
-
-    /**
-     * Helps to create the instance of {@link PoliciesImpl}.
-     */
-    public static class PoliciesImplBuilder {
-
-        private String referer;
-        private String match;
-        private String create;
-        private Long   until;
-        private Long   since;
-
-        public PoliciesImpl build() {
-            return new PoliciesImpl(referer, match, create, until, since);
-        }
-
-        public PoliciesImplBuilder() {}
-
-        public PoliciesImplBuilder setReferer(String referer) {
-            this.referer = referer;
-            return this;
-        }
-
-        public PoliciesImplBuilder setMatch(String match) {
-            this.match = match;
-            return this;
-        }
-
-        public PoliciesImplBuilder setCreate(String create) {
-            this.create = create;
-            return this;
-        }
-
-        public PoliciesImplBuilder setUntil(Long until) {
-            this.until = until;
-            return this;
-        }
-
-        public PoliciesImplBuilder setSince(Long since) {
-            this.since = since;
-            return this;
-        }
     }
 }

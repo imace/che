@@ -1,0 +1,249 @@
+/*******************************************************************************
+ * Copyright (c) 2012-2016 Codenvy, S.A.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Codenvy, S.A. - initial API and implementation
+ *******************************************************************************/
+package org.eclipse.che.api.factory.server.spi.tck;
+
+import com.google.common.collect.ImmutableMap;
+
+import org.eclipse.che.api.core.ConflictException;
+import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.factory.server.FactoryImage;
+import org.eclipse.che.api.factory.server.model.impl.ActionImpl;
+import org.eclipse.che.api.factory.server.model.impl.AuthorImpl;
+import org.eclipse.che.api.factory.server.model.impl.ButtonAttributesImpl;
+import org.eclipse.che.api.factory.server.model.impl.ButtonImpl;
+import org.eclipse.che.api.factory.server.model.impl.FactoryImpl;
+import org.eclipse.che.api.factory.server.model.impl.IdeImpl;
+import org.eclipse.che.api.factory.server.model.impl.OnAppClosedImpl;
+import org.eclipse.che.api.factory.server.model.impl.OnAppLoadedImpl;
+import org.eclipse.che.api.factory.server.model.impl.OnProjectsLoadedImpl;
+import org.eclipse.che.api.factory.server.model.impl.PoliciesImpl;
+import org.eclipse.che.api.factory.server.spi.FactoryDao;
+import org.eclipse.che.api.factory.shared.model.Button;
+import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
+import org.eclipse.che.api.machine.server.model.impl.LimitsImpl;
+import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
+import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
+import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
+import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
+import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
+import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
+import org.eclipse.che.commons.test.tck.TckModuleFactory;
+import org.eclipse.che.commons.test.tck.repository.TckRepository;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Guice;
+import org.testng.annotations.Test;
+
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static java.util.Arrays.asList;
+import static java.util.Collections.singleton;
+import static java.util.Collections.singletonList;
+import static org.testng.Assert.assertEquals;
+
+
+/**
+ * Tests {@link FactoryDao} contract.
+ *
+ * @author Anton Korneta
+ */
+@Guice(moduleFactory = TckModuleFactory.class)
+@Test(suiteName = FactoryDaoTest.SUITE_NAME)
+public class FactoryDaoTest {
+
+    public static final String SUITE_NAME = "FactoryDaoTck";
+
+    private static final int ENTRY_COUNT = 5;
+
+    private List<FactoryImpl> factories;
+
+    @Inject
+    private FactoryDao factoryDao;
+
+    @Inject
+    private TckRepository<FactoryImpl> tckRepository;
+
+    @BeforeMethod
+    public void setUp() throws Exception {
+        factories = new ArrayList<>(ENTRY_COUNT);
+        for (int i = 0; i < ENTRY_COUNT; i++) {
+            factories.add(createFactory(i));
+        }
+        tckRepository.createAll(factories);
+    }
+
+    @AfterMethod
+    public void cleanUp() throws Exception {
+        tckRepository.removeAll();
+    }
+
+    @Test(dependsOnMethods = "shouldGetFactoryById")
+    public void shouldCreateFactory() throws Exception {
+        final FactoryImpl factory = createFactory(10);
+        factory.getCreator().setUserId(factories.get(0).getCreator().getUserId());
+        factoryDao.create(factory);
+
+        assertEquals(factoryDao.getById(factory.getId()), factory);
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void shouldThrowNpeWhenCreateNullFactory() throws Exception {
+        factoryDao.create(null);
+    }
+
+    @Test(expectedExceptions = ConflictException.class)
+    public void shouldThrowConflictExceptionWhenCreatingFactoryWithExistingId() throws Exception {
+        final FactoryImpl factory = createFactory(10);
+        final FactoryImpl existing = factories.get(0);
+        factory.getCreator().setUserId(existing.getCreator().getUserId());
+        factory.setId(existing.getId());
+        factoryDao.create(factory);
+    }
+
+    @Test(expectedExceptions = ConflictException.class)
+    public void shouldThrowConflictExceptionWhenCreatingFactoryWithExistingNameAndUserId() throws Exception {
+        final FactoryImpl factory = createFactory(10);
+        final FactoryImpl existing = factories.get(0);
+        factory.getCreator().setUserId(existing.getCreator().getUserId());
+        factory.setName(existing.getName());
+        factoryDao.create(factory);
+    }
+
+    @Test
+    public void shouldGetFactoryById() throws Exception {
+        final FactoryImpl factory = factories.get(0);
+
+        assertEquals(factoryDao.getById(factory.getId()), factory);
+    }
+
+    @Test(expectedExceptions = NotFoundException.class)
+    public void shouldThrowNotFoundExceptionWhenFactoryWithGivenIdDoesNotExist() throws Exception {
+        factoryDao.getById("non-existing");
+    }
+
+    private static FactoryImpl createFactory(int index) {
+        final long timeMs = System.currentTimeMillis();
+        final ButtonImpl factoryButton = new ButtonImpl(new ButtonAttributesImpl("red", "logo", "style", true),
+                                                        Button.ButtonType.logo);
+        final AuthorImpl creator = new AuthorImpl(timeMs, "name_" + index, "id_" + index, "email_" + index);
+        final PoliciesImpl policies = new PoliciesImpl("referrer", "match", "create", timeMs, timeMs + 1000);
+        final Set<FactoryImage> images = new HashSet<>();
+        final List<ActionImpl> actions1 = new ArrayList<>(singletonList(new ActionImpl("id" + index, ImmutableMap.of("key1", "value1"))));
+        final OnAppLoadedImpl onAppLoaded = new OnAppLoadedImpl(actions1);
+        final List<ActionImpl> actions2 = new ArrayList<>(singletonList(new ActionImpl("id" + index, ImmutableMap.of("key2", "value2"))));
+        final OnProjectsLoadedImpl onProjectsLoaded = new OnProjectsLoadedImpl(actions2);
+        final List<ActionImpl> actions3 = new ArrayList<>(singletonList(new ActionImpl("id" + index, ImmutableMap.of("key3", "value3"))));
+        final OnAppClosedImpl onAppClosed = new OnAppClosedImpl(actions3);
+        final IdeImpl ide = new IdeImpl(onAppLoaded, onProjectsLoaded, onAppClosed);
+        return FactoryImpl.builder()
+                          .generateId()
+                          .setVersion("4_0")
+                          .setName("factoryName" + index)
+                          .setWorkspace(createWorkspaceConfig(index))
+                          .setButton(factoryButton)
+                          .setCreator(creator)
+                          .setPolicies(policies)
+                          .setImages(images)
+                          .setIde(ide)
+                          .build();
+    }
+
+    public static WorkspaceConfigImpl createWorkspaceConfig(int index) {
+        // Project Sources configuration
+        final SourceStorageImpl source1 = new SourceStorageImpl();
+        source1.setType("type1");
+        source1.setLocation("location1");
+        source1.setParameters(new HashMap<>(ImmutableMap.of("param1", "value1")));
+        final SourceStorageImpl source2 = new SourceStorageImpl();
+        source2.setType("type2");
+        source2.setLocation("location2");
+        source2.setParameters(new HashMap<>(ImmutableMap.of("param4", "value1")));
+
+        // Project Configuration
+        final ProjectConfigImpl pCfg1 = new ProjectConfigImpl();
+        pCfg1.setPath("/path1");
+        pCfg1.setType("type1");
+        pCfg1.setName("project1");
+        pCfg1.setDescription("description1");
+        pCfg1.getMixins().addAll(asList("mixin1", "mixin2"));
+        pCfg1.setSource(source1);
+        pCfg1.getAttributes().putAll(ImmutableMap.of("key1", asList("v1", "v2"), "key2", asList("v1", "v2")));
+
+        final ProjectConfigImpl pCfg2 = new ProjectConfigImpl();
+        pCfg2.setPath("/path2");
+        pCfg2.setType("type2");
+        pCfg2.setName("project2");
+        pCfg2.setDescription("description2");
+        pCfg2.getMixins().addAll(asList("mixin3", "mixin4"));
+        pCfg2.setSource(source2);
+        pCfg2.getAttributes().putAll(ImmutableMap.of("key3", asList("v1", "v2"), "key4", asList("v1", "v2")));
+
+        final List<ProjectConfigImpl> projects = new ArrayList<>(asList(pCfg1, pCfg2));
+
+        // Commands
+        final CommandImpl cmd1 = new CommandImpl("name1", "cmd1", "type1");
+        cmd1.getAttributes().putAll(ImmutableMap.of("key1", "value1"));
+        final CommandImpl cmd2 = new CommandImpl("name2", "cmd2", "type2");
+        cmd2.getAttributes().putAll(ImmutableMap.of("key4", "value4"));
+        final List<CommandImpl> commands = new ArrayList<>(asList(cmd1, cmd2));
+
+        // Machine configs
+        final MachineConfigImpl mCfg1 = new MachineConfigImpl();
+        mCfg1.setName("name1");
+        mCfg1.setDev(true);
+        mCfg1.setType("type1");
+        mCfg1.setLimits(new LimitsImpl(2048));
+        mCfg1.getEnvVariables().putAll(ImmutableMap.of("env", "XTERM"));
+        mCfg1.getServers().addAll(singleton(new ServerConfImpl("ref1", "port1", "protocol1", "path1")));
+        mCfg1.setSource(new MachineSourceImpl("type1", "location1", "content1"));
+
+        final MachineConfigImpl mCfg2 = new MachineConfigImpl();
+        mCfg2.setName("name2");
+        mCfg2.setDev(false);
+        mCfg2.setType("type2");
+        mCfg2.setLimits(new LimitsImpl(512));
+        mCfg2.getEnvVariables().putAll(ImmutableMap.of("env1", "value"));
+        mCfg2.getServers().add(new ServerConfImpl("ref2", "port2", "protocol2", "path2"));
+        mCfg2.setSource(new MachineSourceImpl("type2", "location2", "content2"));
+
+        final List<MachineConfigImpl> machineConfigs = new ArrayList<>(asList(mCfg1, mCfg2));
+
+        // Environments
+        final EnvironmentImpl env1 = new EnvironmentImpl();
+        env1.setName("env1");
+        env1.setMachineConfigs(machineConfigs);
+
+        final EnvironmentImpl env2 = new EnvironmentImpl();
+        env2.setName("env2");
+        env2.setMachineConfigs(machineConfigs.stream()
+                                             .map(MachineConfigImpl::new)
+                                             .collect(Collectors.toList()));
+
+        final List<EnvironmentImpl> environments = new ArrayList<>(asList(env1, env2));
+
+        // Workspace configuration
+        final WorkspaceConfigImpl wCfg = new WorkspaceConfigImpl();
+        wCfg.setDefaultEnv(env1.getName());
+        wCfg.setName("cfgName_" + index);
+        wCfg.setDescription("description");
+        wCfg.setCommands(commands);
+        wCfg.setProjects(projects);
+        wCfg.setEnvironments(environments);
+        return wCfg;
+    }
+}

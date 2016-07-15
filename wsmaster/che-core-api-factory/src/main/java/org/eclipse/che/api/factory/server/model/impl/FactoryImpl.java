@@ -19,6 +19,17 @@ import org.eclipse.che.api.factory.shared.model.Policies;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.commons.lang.NameGenerator;
 
+import javax.persistence.Basic;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
+import javax.persistence.Embedded;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -28,21 +39,48 @@ import java.util.Set;
  *
  * @author Anton Korneta
  */
+@Entity(name = "Factory")
+@Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"name", "userId"})})
 public class FactoryImpl implements Factory {
 
     public static FactoryImplBuilder builder() {
         return new FactoryImplBuilder();
     }
 
-    private final String              id;
-    private final String              name;
-    private final String              version;
-    private final WorkspaceConfigImpl workspace;
-    private final AuthorImpl          creator;
-    private final PoliciesImpl        policies;
-    private final ButtonImpl          button;
-    private       IdeImpl             ide;
-    private       Set<FactoryImage>   images;
+    @Id
+    private String id;
+
+    @Basic
+    private String name;
+
+    @Column(nullable = false)
+    private String version;
+
+    @OneToOne(cascade = CascadeType.ALL,
+              orphanRemoval = true,
+              optional = false )
+    private WorkspaceConfigImpl workspace;
+
+    @OneToOne(cascade = CascadeType.ALL,
+              orphanRemoval = true,
+              optional = false)
+    @JoinColumn(name = "userId",
+                referencedColumnName = "userId")
+    private AuthorImpl creator;
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    private ButtonImpl button;
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    private IdeImpl ide;
+
+    @Embedded
+    private PoliciesImpl policies;
+
+    @ElementCollection
+    private Set<FactoryImage> images;
+
+    public FactoryImpl() {}
 
     public FactoryImpl(String id,
                        String name,
@@ -83,9 +121,17 @@ public class FactoryImpl implements Factory {
         return id;
     }
 
+    public void setId(String id) {
+        this.id = id;
+    }
+
     @Override
     public String getName() {
         return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     @Override
@@ -93,9 +139,17 @@ public class FactoryImpl implements Factory {
         return version;
     }
 
+    public void setV(String version) {
+        this.version = version;
+    }
+
     @Override
     public WorkspaceConfigImpl getWorkspace() {
         return workspace;
+    }
+
+    public void setWorkspace(WorkspaceConfigImpl workspace) {
+        this.workspace = workspace;
     }
 
     @Override
@@ -103,9 +157,17 @@ public class FactoryImpl implements Factory {
         return creator;
     }
 
+    public void setCreator(AuthorImpl creator) {
+        this.creator = creator;
+    }
+
     @Override
     public Policies getPolicies() {
         return policies;
+    }
+
+    public void setPolicies(PoliciesImpl policies) {
+        this.policies = policies;
     }
 
     @Override
@@ -113,9 +175,17 @@ public class FactoryImpl implements Factory {
         return button;
     }
 
+    public void setButton(ButtonImpl button) {
+        this.button = button;
+    }
+
     @Override
     public IdeImpl getIde() {
         return ide;
+    }
+
+    public void setIde(IdeImpl ide) {
+        this.ide = ide;
     }
 
     public Set<FactoryImage> getImages() {
@@ -123,6 +193,10 @@ public class FactoryImpl implements Factory {
             images = new HashSet<>();
         }
         return images;
+    }
+
+    public void setImages(Set<FactoryImage> images) {
+        this.images = images;
     }
 
     @Override
