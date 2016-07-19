@@ -507,6 +507,18 @@ export class CreateProjectCtrl {
 
       this.cleanupChannels(websocketStream, workspaceBus, bus, channel);
       this.createProjectSvc.setCurrentProgressStep(4);
+
+      // redirect to IDE
+      // reset progress
+      if (!this.createProjectSvc.isShowPopup()) {
+        let link = this.getIDELink();
+        if (link.indexOf('#') === 0) {
+          link = link.substring(1, link.length);
+        }
+        this.$location.path(link);
+
+        this.resetCreateProgress();
+      }
     }, (error) => {
       this.cleanupChannels(websocketStream, workspaceBus, bus, channel);
       this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
