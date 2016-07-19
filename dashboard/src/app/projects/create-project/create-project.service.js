@@ -134,10 +134,10 @@ export class CreateProjectSvc {
         if (!this.initPopup) {
             this.initPopup = true;
             // The new element to be added
-            var $div = $('<create-project-popup></create-project-popup>');
+            var $div = angular.element('<create-project-popup></create-project-popup>');
 
             // The parent of the new element
-            var $target = $('body');
+            var $target = angular.element('body');
 
             let $scope = angular.element($target).scope();
             let insertHtml = this.$compile($div)($scope);

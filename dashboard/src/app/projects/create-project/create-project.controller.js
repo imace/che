@@ -21,7 +21,7 @@ export class CreateProjectCtrl {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(cheAPI, cheStack, $websocket, $routeParams, $filter, $timeout, $location, $mdDialog, $scope, $rootScope, createProjectSvc, lodash, cheNotification, $q, $log, $document, routeHistory) {
+  constructor(cheAPI, cheStack, $websocket, $routeParams, $filter, $timeout, $location, $mdDialog, $scope, $rootScope, createProjectSvc, lodash, cheNotification, $q, $log, $document, routeHistory, $window) {
     this.$log = $log;
     this.cheAPI = cheAPI;
     this.cheStack = cheStack;
@@ -36,6 +36,7 @@ export class CreateProjectCtrl {
     this.cheNotification = cheNotification;
     this.$q = $q;
     this.$document = $document;
+    this.$window = $window;
 
     if ($routeParams.resetProgress) {
       this.resetCreateProgress();
@@ -566,10 +567,6 @@ export class CreateProjectCtrl {
       fetchTypePromise.then(() => {
         let projectTypesByCategory = projectTypeService.getProjectTypesIDs();
         // now try the estimate for each source
-        let deferredEstimate = this.$q.defer();
-        let deferredEstimatePromise = deferredResolve.promise;
-
-
         let estimatePromises = [];
         let estimateTypes = [];
         resultResolve.forEach((sourceResolve) => {
@@ -924,7 +921,7 @@ export class CreateProjectCtrl {
    * @param workspace workspace for listening status
    */
   subscribeStatusChannel(workspace) {
-    this.cheAPI.getWorkspace().fetchStatusChange(workspace.id, 'ERROR').then(() => {
+    this.cheAPI.getWorkspace().fetchStatusChange(workspace.id, 'ERROR').then((message) => {
       this.createProjectSvc.setCurrentProgressStep(2);
       this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
       // need to show the error
@@ -1228,7 +1225,7 @@ export class CreateProjectCtrl {
     this.getCreationSteps().forEach((step) => {
       logs += step.logs + '\n';
     });
-    window.open('data:text/csv,' + encodeURIComponent(logs));
+    this.$window.open('data:text/csv,' + encodeURIComponent(logs));
   }
 
   getCreateButtonTitle() {
