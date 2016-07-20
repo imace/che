@@ -53,7 +53,7 @@ public class OnAppLoadedImpl implements OnAppLoaded {
     }
 
     @Override
-    public List<? extends Action> getActions() {
+    public List<ActionImpl> getActions() {
         if (actions == null) {
             return new ArrayList<>();
         }

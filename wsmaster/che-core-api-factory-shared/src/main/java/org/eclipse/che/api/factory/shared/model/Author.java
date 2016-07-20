@@ -18,22 +18,12 @@ package org.eclipse.che.api.factory.shared.model;
 public interface Author {
 
     /**
-     * Name of the author
-     */
-    String getName();
-
-    /**
-     * Email of the author
-     */
-    String getEmail();
-
-    /**
-     * Id of user that create factory, set by the server
+     * Identifier of the user who created factory, it is mandatory.
      */
     String getUserId();
 
     /**
-     * @return Creation time of factory, set by the server (in milliseconds, from Unix epoch, no timezone)
+     * Creation time of factory, set by the server (in milliseconds, from Unix epoch, no timezone)
      */
     Long getCreated();
 }

@@ -53,7 +53,7 @@ public class OnAppClosedImpl implements OnAppClosed {
     }
 
     @Override
-    public List<? extends Action> getActions() {
+    public List<ActionImpl> getActions() {
         if (actions == null) {
             return new ArrayList<>();
         }

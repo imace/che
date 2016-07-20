@@ -14,11 +14,10 @@ import org.eclipse.che.api.factory.shared.model.Author;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 
 import javax.persistence.Basic;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.Column;
+import javax.persistence.Embeddable;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import java.util.Objects;
 
 /**
@@ -26,27 +25,20 @@ import java.util.Objects;
  *
  * @author Anton Korneta
  */
-@Entity(name = "Author")
+@Embeddable
 public class AuthorImpl implements Author {
-
-    @Id
-    @GeneratedValue
-    private Long id;
 
     @Basic
     private Long created;
 
-    @Basic
+    @Column(name = "author_name")
     private String name;
 
     @Basic
     private String userId;
 
-    @ManyToOne
-    @JoinColumn(insertable = false,
-                updatable = false,
-                name = "userId",
-                referencedColumnName = "id")
+    @OneToOne
+    @JoinColumn(insertable = false, updatable = false, name = "userId", referencedColumnName = "id")
     private UserImpl userEntity;
 
     @Basic

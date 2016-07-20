@@ -22,9 +22,11 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.ConstraintMode;
 import javax.persistence.ElementCollection;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.ForeignKey;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
@@ -56,16 +58,11 @@ public class FactoryImpl implements Factory {
     @Column(nullable = false)
     private String version;
 
-    @OneToOne(cascade = CascadeType.ALL,
-              orphanRemoval = true,
-              optional = false )
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, optional = false)
     private WorkspaceConfigImpl workspace;
 
-    @OneToOne(cascade = CascadeType.ALL,
-              orphanRemoval = true,
-              optional = false)
-    @JoinColumn(name = "userId",
-                referencedColumnName = "userId")
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, optional = false)
+
     private AuthorImpl creator;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)

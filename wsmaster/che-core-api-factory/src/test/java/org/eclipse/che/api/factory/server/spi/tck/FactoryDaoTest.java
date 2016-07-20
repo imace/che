@@ -26,6 +26,7 @@ import org.eclipse.che.api.factory.server.model.impl.OnAppLoadedImpl;
 import org.eclipse.che.api.factory.server.model.impl.OnProjectsLoadedImpl;
 import org.eclipse.che.api.factory.server.model.impl.PoliciesImpl;
 import org.eclipse.che.api.factory.server.spi.FactoryDao;
+import org.eclipse.che.api.factory.shared.model.Action;
 import org.eclipse.che.api.factory.shared.model.Button;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
 import org.eclipse.che.api.machine.server.model.impl.LimitsImpl;
@@ -125,10 +126,50 @@ public class FactoryDaoTest {
     }
 
     @Test
+    public void shouldUpdateFactory() throws Exception {
+        final FactoryImpl update = factories.get(0);
+        final String userId = update.getCreator().getUserId();
+        update.setName("new-name");
+        update.setV("5_0");
+        final long currentTime = System.currentTimeMillis();
+        update.setPolicies(new PoliciesImpl("ref", "match", "per-click", currentTime, currentTime + 1000));
+        update.setCreator(new AuthorImpl(currentTime, "username", userId, "new-email"));
+        update.setButton(new ButtonImpl(new ButtonAttributesImpl("green", "icon", "opacity 0.9", true),
+                                        Button.ButtonType.nologo));
+        update.getIde().getOnAppClosed().getActions().add(new ActionImpl("remove file", ImmutableMap.of("file1", "/che/core/pom.xml")));
+        update.getIde().getOnAppLoaded().getActions().add(new ActionImpl("edit file", ImmutableMap.of("file2", "/che/core/pom.xml")));
+        update.getIde().getOnProjectsLoaded().getActions().add(new ActionImpl("open file", ImmutableMap.of("file2", "/che/pom.xml")));
+//        update.setWorkspace(createWorkspaceConfig(10));
+        factoryDao.update(update);
+
+        assertEquals(factoryDao.getById(update.getId()), update);
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void shouldThrowNpeWhenFactoryUpdateIsNull() throws Exception {
+        factoryDao.update(null);
+    }
+
+    @Test(expectedExceptions = ConflictException.class)
+    public void shouldThrowConflictExceptionWhenUpdatingFactoryWithExistingNameAndUserId() throws Exception {
+        throw new ConflictException("qwe");
+    }
+
+    @Test(expectedExceptions = NotFoundException.class)
+    public void shouldThrowNotFoundExceptionWhenUpdatingNonExistingFactory() throws Exception {
+        factoryDao.update(createFactory(10));
+    }
+
+    @Test
     public void shouldGetFactoryById() throws Exception {
         final FactoryImpl factory = factories.get(0);
 
         assertEquals(factoryDao.getById(factory.getId()), factory);
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void shouldThrowNpeWhenGettingFactoryByNullId() throws Exception {
+        factoryDao.getById(null);
     }
 
     @Test(expectedExceptions = NotFoundException.class)
@@ -143,12 +184,12 @@ public class FactoryDaoTest {
         final AuthorImpl creator = new AuthorImpl(timeMs, "name_" + index, "id_" + index, "email_" + index);
         final PoliciesImpl policies = new PoliciesImpl("referrer", "match", "create", timeMs, timeMs + 1000);
         final Set<FactoryImage> images = new HashSet<>();
-        final List<ActionImpl> actions1 = new ArrayList<>(singletonList(new ActionImpl("id" + index, ImmutableMap.of("key1", "value1"))));
-        final OnAppLoadedImpl onAppLoaded = new OnAppLoadedImpl(actions1);
-        final List<ActionImpl> actions2 = new ArrayList<>(singletonList(new ActionImpl("id" + index, ImmutableMap.of("key2", "value2"))));
-        final OnProjectsLoadedImpl onProjectsLoaded = new OnProjectsLoadedImpl(actions2);
-        final List<ActionImpl> actions3 = new ArrayList<>(singletonList(new ActionImpl("id" + index, ImmutableMap.of("key3", "value3"))));
-        final OnAppClosedImpl onAppClosed = new OnAppClosedImpl(actions3);
+        final List<ActionImpl> a1 = new ArrayList<>(singletonList(new ActionImpl("id" + index, ImmutableMap.of("key1", "value1"))));
+        final OnAppLoadedImpl onAppLoaded = new OnAppLoadedImpl(a1);
+        final List<ActionImpl> a2 = new ArrayList<>(singletonList(new ActionImpl("id" + index, ImmutableMap.of("key2", "value2"))));
+        final OnProjectsLoadedImpl onProjectsLoaded = new OnProjectsLoadedImpl(a2);
+        final List<ActionImpl> a3 = new ArrayList<>(singletonList(new ActionImpl("id" + index, ImmutableMap.of("key3", "value3"))));
+        final OnAppClosedImpl onAppClosed = new OnAppClosedImpl(a3);
         final IdeImpl ide = new IdeImpl(onAppLoaded, onProjectsLoaded, onAppClosed);
         return FactoryImpl.builder()
                           .generateId()
