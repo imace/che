@@ -414,6 +414,10 @@ public class AppContextImpl implements AppContext,
             }
         }
 
+        if (currentResources[0] == null) {
+            return null;
+        }
+
         Project root = null;
 
         for (Project project : projects) {
