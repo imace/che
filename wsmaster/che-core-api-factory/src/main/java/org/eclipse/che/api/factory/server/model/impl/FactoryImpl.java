@@ -12,23 +12,20 @@ package org.eclipse.che.api.factory.server.model.impl;
 
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.factory.server.FactoryImage;
-import org.eclipse.che.api.factory.shared.model.Button;
-import org.eclipse.che.api.factory.shared.model.Factory;
-import org.eclipse.che.api.factory.shared.model.Ide;
-import org.eclipse.che.api.factory.shared.model.Policies;
+import org.eclipse.che.api.core.model.factory.Button;
+import org.eclipse.che.api.core.model.factory.Factory;
+import org.eclipse.che.api.core.model.factory.Ide;
+import org.eclipse.che.api.core.model.factory.Policies;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.commons.lang.NameGenerator;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import javax.persistence.ConstraintMode;
 import javax.persistence.ElementCollection;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
-import javax.persistence.ForeignKey;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;

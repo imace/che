@@ -8,17 +8,18 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.factory.shared.model;
+package org.eclipse.che.api.core.model.factory;
+
+import java.util.List;
 
 /**
- * @author @author Anton Korneta
+ * Describe IDE look and feel on application loaded event.
+ *
+ * @author Anton Korneta
  */
-public interface ButtonAttributes {
-    String getColor();
-
-    Boolean getCounter();
-
-    String getLogo();
-
-    String getStyle();
+public interface OnAppLoaded {
+    /**
+     * @return actions for current event.
+     */
+    List<? extends Action> getActions();
 }

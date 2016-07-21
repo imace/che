@@ -11,7 +11,7 @@
 package org.eclipse.che.api.factory.shared.dto;
 
 import org.eclipse.che.api.core.factory.FactoryParameter;
-import org.eclipse.che.api.factory.shared.model.Policies;
+import org.eclipse.che.api.core.model.factory.Policies;
 import org.eclipse.che.dto.shared.DTO;
 
 import static org.eclipse.che.api.core.factory.FactoryParameter.Obligation.OPTIONAL;

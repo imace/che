@@ -8,16 +8,16 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.factory.shared.model;
+package org.eclipse.che.api.core.model.factory;
 
 import java.util.List;
 
 /**
- * Describe IDE look and feel on application loaded event.
+ * Describe IDE look and feel on application closed event.
  *
  * @author Anton Korneta
  */
-public interface OnAppLoaded {
+public interface OnAppClosed {
     /**
      * @return actions for current event.
      */

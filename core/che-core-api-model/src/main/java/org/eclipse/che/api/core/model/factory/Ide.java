@@ -8,18 +8,26 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.factory.shared.model;
-
-import java.util.List;
+package org.eclipse.che.api.core.model.factory;
 
 /**
- * Describe IDE look and feel on application closed event.
+ * Describe IDE interface Look and Feel
  *
  * @author Anton Korneta
  */
-public interface OnAppClosed {
+public interface Ide {
     /**
-     * @return actions for current event.
+     * @return configuration of IDE on application loaded event.
      */
-    List<? extends Action> getActions();
+    OnAppLoaded getOnAppLoaded();
+
+    /**
+     * @return configuration of IDE on application closed event.
+     */
+    OnAppClosed getOnAppClosed();
+
+    /**
+     * @return configuration of IDE on projects loaded event.
+     */
+    OnProjectsLoaded getOnProjectsLoaded();
 }

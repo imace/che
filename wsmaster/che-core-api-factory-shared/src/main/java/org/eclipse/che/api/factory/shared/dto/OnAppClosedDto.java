@@ -11,7 +11,7 @@
 package org.eclipse.che.api.factory.shared.dto;
 
 import org.eclipse.che.api.core.factory.FactoryParameter;
-import org.eclipse.che.api.factory.shared.model.OnAppClosed;
+import org.eclipse.che.api.core.model.factory.OnAppClosed;
 import org.eclipse.che.dto.shared.DTO;
 
 import java.util.List;

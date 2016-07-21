@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.factory.server.model.impl;
 
-import org.eclipse.che.api.factory.shared.model.ButtonAttributes;
+import org.eclipse.che.api.core.model.factory.ButtonAttributes;
 
 import javax.persistence.Basic;
 import javax.persistence.Embeddable;

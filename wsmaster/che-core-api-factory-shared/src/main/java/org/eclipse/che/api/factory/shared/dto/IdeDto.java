@@ -13,7 +13,7 @@ package org.eclipse.che.api.factory.shared.dto;
 import static org.eclipse.che.api.core.factory.FactoryParameter.Obligation.OPTIONAL;
 
 import org.eclipse.che.api.core.factory.FactoryParameter;
-import org.eclipse.che.api.factory.shared.model.Ide;
+import org.eclipse.che.api.core.model.factory.Ide;
 import org.eclipse.che.dto.shared.DTO;
 
 /**

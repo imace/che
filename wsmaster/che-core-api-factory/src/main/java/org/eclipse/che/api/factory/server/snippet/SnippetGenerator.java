@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.factory.server.snippet;
 
-import org.eclipse.che.api.factory.shared.model.Button;
-import org.eclipse.che.api.factory.shared.model.Factory;
+import org.eclipse.che.api.core.model.factory.Button;
+import org.eclipse.che.api.core.model.factory.Factory;
 
 import javax.ws.rs.core.UriBuilder;
 import java.util.Formatter;

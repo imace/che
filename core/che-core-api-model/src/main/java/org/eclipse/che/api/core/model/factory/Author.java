@@ -8,26 +8,22 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.factory.shared.model;
+package org.eclipse.che.api.core.model.factory;
 
 /**
- * Describe IDE interface Look and Feel
+ * Describes author of the factory.
  *
  * @author Anton Korneta
  */
-public interface Ide {
-    /**
-     * @return configuration of IDE on application loaded event.
-     */
-    OnAppLoaded getOnAppLoaded();
+public interface Author {
 
     /**
-     * @return configuration of IDE on application closed event.
+     * Identifier of the user who created factory, it is mandatory
      */
-    OnAppClosed getOnAppClosed();
+    String getUserId();
 
     /**
-     * @return configuration of IDE on projects loaded event.
+     * Creation time of factory, set by the server (in milliseconds, from Unix epoch, no timezone)
      */
-    OnProjectsLoaded getOnProjectsLoaded();
+    Long getCreated();
 }

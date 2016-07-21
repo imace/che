@@ -26,7 +26,7 @@ import org.eclipse.che.api.factory.server.model.impl.OnAppLoadedImpl;
 import org.eclipse.che.api.factory.server.model.impl.OnProjectsLoadedImpl;
 import org.eclipse.che.api.factory.server.model.impl.PoliciesImpl;
 import org.eclipse.che.api.factory.server.spi.FactoryDao;
-import org.eclipse.che.api.factory.shared.model.Button;
+import org.eclipse.che.api.core.model.factory.Button;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
 import org.eclipse.che.api.machine.server.model.impl.LimitsImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;

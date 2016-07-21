@@ -8,26 +8,24 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.factory.shared.model;
+package org.eclipse.che.api.core.model.factory;
+
+import java.util.Map;
 
 /**
- * Describes factory button
+ * Defines ide action model.
  *
  * @author Anton Korneta
  */
-public interface Button {
-
-    enum ButtonType {
-        logo, nologo
-    }
+public interface Action {
 
     /**
-     * @return Type of the button
+     * Returns the identifier of this action instance.
      */
-    ButtonType getType();
+    String getId();
 
     /**
-     * @return button attributes
+     * Returns properties of this action instance.
      */
-    ButtonAttributes getAttributes();
+    Map<String, String> getProperties();
 }

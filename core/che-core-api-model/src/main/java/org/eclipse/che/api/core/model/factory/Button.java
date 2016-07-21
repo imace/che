@@ -8,22 +8,26 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.factory.shared.model;
+package org.eclipse.che.api.core.model.factory;
 
 /**
- * Describes author of the factory.
+ * Describes factory button
  *
  * @author Anton Korneta
  */
-public interface Author {
+public interface Button {
+
+    enum ButtonType {
+        logo, nologo
+    }
 
     /**
-     * Identifier of the user who created factory, it is mandatory
+     * @return Type of the button
      */
-    String getUserId();
+    ButtonType getType();
 
     /**
-     * Creation time of factory, set by the server (in milliseconds, from Unix epoch, no timezone)
+     * @return button attributes
      */
-    Long getCreated();
+    ButtonAttributes getAttributes();
 }

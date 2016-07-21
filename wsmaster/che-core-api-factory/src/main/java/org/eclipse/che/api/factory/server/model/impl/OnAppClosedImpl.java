@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.factory.server.model.impl;
 
-import org.eclipse.che.api.factory.shared.model.Action;
-import org.eclipse.che.api.factory.shared.model.OnAppClosed;
+import org.eclipse.che.api.core.model.factory.Action;
+import org.eclipse.che.api.core.model.factory.OnAppClosed;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;

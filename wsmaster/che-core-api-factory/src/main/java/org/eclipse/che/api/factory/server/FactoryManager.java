@@ -16,7 +16,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.factory.server.model.impl.FactoryImpl;
 import org.eclipse.che.api.factory.server.snippet.SnippetGenerator;
 import org.eclipse.che.api.factory.server.spi.FactoryDao;
-import org.eclipse.che.api.factory.shared.model.Factory;
+import org.eclipse.che.api.core.model.factory.Factory;
 import org.eclipse.che.commons.lang.Pair;
 
 import javax.inject.Inject;

@@ -8,24 +8,18 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.factory.shared.model;
+package org.eclipse.che.api.core.model.factory;
 
-import java.util.Map;
+import java.util.List;
 
 /**
- * Defines ide action model.
+ * Describe IDE look and feel on project opened event.
  *
  * @author Anton Korneta
  */
-public interface Action {
-
+public interface OnProjectsLoaded {
     /**
-     * Returns the identifier of this action instance.
+     * @return actions for current event.
      */
-    String getId();
-
-    /**
-     * Returns properties of this action instance.
-     */
-    Map<String, String> getProperties();
+    List<? extends Action> getActions();
 }

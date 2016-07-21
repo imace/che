@@ -29,7 +29,7 @@ import org.eclipse.che.api.factory.server.impl.SourceStorageParametersValidator;
 import org.eclipse.che.api.factory.server.model.impl.AuthorImpl;
 import org.eclipse.che.api.factory.server.model.impl.FactoryImpl;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
-import org.eclipse.che.api.factory.shared.model.Factory;
+import org.eclipse.che.api.core.model.factory.Factory;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
 import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;

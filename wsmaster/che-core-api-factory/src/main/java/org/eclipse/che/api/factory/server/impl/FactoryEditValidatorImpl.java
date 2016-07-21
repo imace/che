@@ -13,8 +13,8 @@ package org.eclipse.che.api.factory.server.impl;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.factory.server.FactoryEditValidator;
-import org.eclipse.che.api.factory.shared.model.Author;
-import org.eclipse.che.api.factory.shared.model.Factory;
+import org.eclipse.che.api.core.model.factory.Author;
+import org.eclipse.che.api.core.model.factory.Factory;
 import org.eclipse.che.commons.env.EnvironmentContext;
 
 import javax.inject.Singleton;

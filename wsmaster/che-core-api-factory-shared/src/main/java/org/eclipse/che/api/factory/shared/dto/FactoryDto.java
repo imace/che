@@ -13,7 +13,7 @@ package org.eclipse.che.api.factory.shared.dto;
 import org.eclipse.che.api.core.factory.FactoryParameter;
 import org.eclipse.che.api.core.rest.shared.dto.Hyperlinks;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
-import org.eclipse.che.api.factory.shared.model.Factory;
+import org.eclipse.che.api.core.model.factory.Factory;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.dto.shared.DTO;
 

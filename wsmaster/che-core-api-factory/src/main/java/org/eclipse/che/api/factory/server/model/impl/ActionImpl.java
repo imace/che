@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.factory.server.model.impl;
 
-import org.eclipse.che.api.factory.shared.model.Action;
+import org.eclipse.che.api.core.model.factory.Action;
 
 import javax.persistence.Basic;
 import javax.persistence.ElementCollection;

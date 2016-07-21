@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.factory.server.model.impl;
 
-import org.eclipse.che.api.factory.shared.model.Ide;
+import org.eclipse.che.api.core.model.factory.Ide;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;

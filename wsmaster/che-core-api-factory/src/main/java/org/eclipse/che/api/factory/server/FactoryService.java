@@ -32,7 +32,7 @@ import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.factory.server.builder.FactoryBuilder;
 import org.eclipse.che.api.factory.shared.dto.AuthorDto;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
-import org.eclipse.che.api.factory.shared.model.Factory;
+import org.eclipse.che.api.core.model.factory.Factory;
 import org.eclipse.che.api.user.server.PreferenceManager;
 import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;

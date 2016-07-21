@@ -21,16 +21,16 @@ import org.eclipse.che.api.factory.shared.dto.OnAppClosedDto;
 import org.eclipse.che.api.factory.shared.dto.OnAppLoadedDto;
 import org.eclipse.che.api.factory.shared.dto.OnProjectsLoadedDto;
 import org.eclipse.che.api.factory.shared.dto.PoliciesDto;
-import org.eclipse.che.api.factory.shared.model.Action;
-import org.eclipse.che.api.factory.shared.model.Author;
-import org.eclipse.che.api.factory.shared.model.Button;
-import org.eclipse.che.api.factory.shared.model.ButtonAttributes;
-import org.eclipse.che.api.factory.shared.model.Factory;
-import org.eclipse.che.api.factory.shared.model.Ide;
-import org.eclipse.che.api.factory.shared.model.OnAppClosed;
-import org.eclipse.che.api.factory.shared.model.OnAppLoaded;
-import org.eclipse.che.api.factory.shared.model.OnProjectsLoaded;
-import org.eclipse.che.api.factory.shared.model.Policies;
+import org.eclipse.che.api.core.model.factory.Action;
+import org.eclipse.che.api.core.model.factory.Author;
+import org.eclipse.che.api.core.model.factory.Button;
+import org.eclipse.che.api.core.model.factory.ButtonAttributes;
+import org.eclipse.che.api.core.model.factory.Factory;
+import org.eclipse.che.api.core.model.factory.Ide;
+import org.eclipse.che.api.core.model.factory.OnAppClosed;
+import org.eclipse.che.api.core.model.factory.OnAppLoaded;
+import org.eclipse.che.api.core.model.factory.OnProjectsLoaded;
+import org.eclipse.che.api.core.model.factory.Policies;
 
 import java.util.List;
 
