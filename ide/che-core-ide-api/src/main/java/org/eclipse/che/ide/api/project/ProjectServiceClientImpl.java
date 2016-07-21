@@ -242,12 +242,6 @@ public class ProjectServiceClientImpl implements ProjectServiceClient {
 
     /** {@inheritDoc} */
     @Override
-    public String getFileContentUrl(Path path) {
-        return getBaseUrl() + FILE + path(path.toString());
-    }
-
-    /** {@inheritDoc} */
-    @Override
     public Promise<ItemReference> createFolder(Path path) {
         final String url = getBaseUrl() + FOLDER + path(path.toString());
 

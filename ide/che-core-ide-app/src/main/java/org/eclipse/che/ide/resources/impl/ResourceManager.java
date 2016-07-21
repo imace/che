@@ -18,6 +18,7 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.model.project.SourceStorage;
+import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.project.shared.dto.ItemReference;
 import org.eclipse.che.api.project.shared.dto.SourceEstimation;
 import org.eclipse.che.api.project.shared.dto.TreeElement;
@@ -819,7 +820,9 @@ public final class ResourceManager {
 
         switch (reference.getType()) {
             case "file":
-                return resourceFactory.newFileImpl(path, urlModifier.modify(ps.getFileContentUrl(path)), this);
+                final Link link = reference.getLink(GET_CONTENT_REL);
+
+                return resourceFactory.newFileImpl(path, link.getHref(), this);
             case "folder":
                 return resourceFactory.newFolderImpl(path, this);
             case "project":

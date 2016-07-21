@@ -151,17 +151,6 @@ public interface ProjectServiceClient {
     Promise<Void> setFileContent(Path path, String content);
 
     /**
-     * Returns the file content URl by given {@code path}.
-     *
-     * @param path
-     *         path to the file
-     * @return string representation of url
-     * @see Path
-     * @since 4.6.0
-     */
-    String getFileContentUrl(Path path);
-
-    /**
      * Removes the item by given {@code path} from the server.
      *
      * @param path
