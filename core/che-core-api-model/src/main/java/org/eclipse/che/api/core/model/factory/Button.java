@@ -11,7 +11,7 @@
 package org.eclipse.che.api.core.model.factory;
 
 /**
- * Describes factory button
+ * Defines factory button.
  *
  * @author Anton Korneta
  */
@@ -22,12 +22,12 @@ public interface Button {
     }
 
     /**
-     * @return Type of the button
+     * Returns type of this button instance
      */
     ButtonType getType();
 
     /**
-     * @return button attributes
+     * Returns attributes of this button instance
      */
     ButtonAttributes getAttributes();
 }

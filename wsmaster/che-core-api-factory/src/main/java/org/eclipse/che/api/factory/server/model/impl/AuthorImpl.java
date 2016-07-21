@@ -39,15 +39,13 @@ public class AuthorImpl implements Author {
 
     public AuthorImpl() {}
 
-    public AuthorImpl(Long created,
-                      String userId) {
+    public AuthorImpl(String userId, Long created) {
         this.created = created;
         this.userId = userId;
     }
 
     public AuthorImpl(Author creator) {
-        this(creator.getCreated(),
-             creator.getUserId());
+        this(creator.getUserId(), creator.getCreated());
     }
 
     @Override

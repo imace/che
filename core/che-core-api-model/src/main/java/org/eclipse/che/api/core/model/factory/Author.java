@@ -11,7 +11,7 @@
 package org.eclipse.che.api.core.model.factory;
 
 /**
- * Describes author of the factory.
+ * Defines factory creator.
  *
  * @author Anton Korneta
  */

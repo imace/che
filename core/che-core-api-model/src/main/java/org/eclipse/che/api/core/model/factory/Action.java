@@ -20,12 +20,12 @@ import java.util.Map;
 public interface Action {
 
     /**
-     * Returns the identifier of this action instance.
+     * Returns the identifier of this action instance
      */
     String getId();
 
     /**
-     * Returns properties of this action instance.
+     * Returns properties of this action instance
      */
     Map<String, String> getProperties();
 }

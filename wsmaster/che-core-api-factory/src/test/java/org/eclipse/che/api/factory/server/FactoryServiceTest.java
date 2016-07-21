@@ -18,6 +18,7 @@ import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.Response;
 
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.model.factory.Factory;
 import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
@@ -29,7 +30,6 @@ import org.eclipse.che.api.factory.server.impl.SourceStorageParametersValidator;
 import org.eclipse.che.api.factory.server.model.impl.AuthorImpl;
 import org.eclipse.che.api.factory.server.model.impl.FactoryImpl;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
-import org.eclipse.che.api.core.model.factory.Factory;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
 import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
@@ -57,6 +57,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import javax.ws.rs.core.MediaType;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -80,6 +81,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.eclipse.che.api.factory.server.DtoConverter.asDto;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
+import static org.hamcrest.core.IsEqual.equalTo;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anySetOf;
 import static org.mockito.Matchers.anyString;
@@ -87,6 +89,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -365,67 +368,57 @@ public class FactoryServiceTest {
     // FactoryService#updateFactory(String factoryId, FactoryDto update) tests:
 
 
-//    @Test
-//    public void shouldBeAbleToUpdateFactory() throws Exception {
-//        final Factory existed = createFactory();
-//        final Factory update = createFactoryWithStorage("git", "http://github.com/codenvy/platform-api1.git");
-//        when(factoryManager.getById(FACTORY_ID)).thenReturn(existed);
-//
-//        final Response response = given().auth()
-//                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-//                                         .contentType(APPLICATION_JSON)
-//                                         .body(JsonHelper.toJson(asDto(update)))
-//                                         .when()
-//                                         .expect()
-//                                         .statusCode(200)
-//                                         .put("/private" + SERVICE_PATH + "/" + FACTORY_ID);
-//
-//        final FactoryDto responseFactory = getFromResponse(response, FactoryDto.class);
-//        assertNotEquals(responseFactory.withLinks(emptyList()), asDto(existed));
-//        verify(factoryManager).updateFactory(eq(update), any());
-//    }
+    @Test
+    public void shouldBeAbleToUpdateFactory() throws Exception {
+        final Factory existed = createFactory();
+        final Factory update = createFactoryWithStorage("git", "http://github.com/codenvy/platform-api1.git");
+        when(factoryManager.getById(FACTORY_ID)).thenReturn(existed);
+        when(factoryManager.updateFactory(any())).thenReturn(update);
 
-//
-//    /**
-//     * Checks that the user can not update an unknown existing factory
-//     */
-//    @Test
-//    public void shouldNotBeAbleToUpdateAnUnknownFactory() throws Exception {
-//        // given
-//        FactoryDto factory = createFactoryWithStorage1("git", "http://github.com/codenvy/platform-api.git");
-//        doThrow(new NotFoundException(format("Factory with id %s is not found.", ILLEGAL_FACTORY_ID))).when(factoryManager)
-//                                                                                                      .getById(anyString());
-//
-//        // when, then
-//        Response response = given().auth().basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-//                                   .contentType(APPLICATION_JSON)
-//                                   .body(JsonHelper.toJson(factory))
-//                                   .when()
-//                                   .put("/private" + SERVICE_PATH + "/" + ILLEGAL_FACTORY_ID);
-//
-//        assertEquals(response.getStatusCode(), 404);
-//        assertEquals(DTO.createDtoFromJson(response.getBody().asString(), ServiceError.class).getMessage(),
-//                     format("Factory with id %s is not found.", ILLEGAL_FACTORY_ID));
-//    }
-//
-//    /**
-//     * Checks that the user can not update a factory with a null one
-//     */
-//    @Test
-//    public void shouldNotBeAbleToUpdateANullFactory() throws Exception {
-//
-//        // when, then
-//        Response response = given().auth()
-//                                   .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-//                                   .contentType(APPLICATION_JSON)
-//                                   .when()
-//                                   .put("/private" + SERVICE_PATH + "/" + ILLEGAL_FACTORY_ID);
-//
-//        assertEquals(response.getStatusCode(), BAD_REQUEST.getStatusCode());
-//        assertEquals(DTO.createDtoFromJson(response.getBody().asString(), ServiceError.class).getMessage(),
-//                     "The updating factory shouldn't be null");
-//
-//    }
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .contentType(APPLICATION_JSON)
+                                         .body(JsonHelper.toJson(asDto(existed, user)))
+                                         .when()
+                                         .expect()
+                                         .statusCode(200)
+                                         .put("/private" + SERVICE_PATH + "/" + FACTORY_ID);
+
+        final FactoryDto result = getFromResponse(response, FactoryDto.class);
+        verify(factoryManager, times(1)).updateFactory(any());
+        assertEquals(result.withLinks(emptyList()), asDto(update, user));
+    }
+
+    @Test
+    public void shouldThrowNotFoundExceptionWhenUpdatingNonExistingFactory() throws Exception {
+        final Factory factory = createFactoryWithStorage("git", "http://github.com/codenvy/platform-api.git");
+        doThrow(new NotFoundException(format("Factory with id %s is not found.", FACTORY_ID))).when(factoryManager)
+                                                                                              .getById(anyString());
+
+        final Response response = given().auth().basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .contentType(APPLICATION_JSON)
+                                         .body(JsonHelper.toJson(factory))
+                                         .when()
+                                         .put("/private" + SERVICE_PATH + "/" + FACTORY_ID);
+
+        assertEquals(response.getStatusCode(), 404);
+        assertEquals(DTO.createDtoFromJson(response.getBody().asString(), ServiceError.class).getMessage(),
+                     format("Factory with id %s is not found.", FACTORY_ID));
+    }
+
+    @Test
+    public void shouldNotBeAbleToUpdateANullFactory() throws Exception {
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .contentType(APPLICATION_JSON)
+                                         .when()
+                                         .put("/private" + SERVICE_PATH + "/" + FACTORY_ID);
+
+        assertEquals(response.getStatusCode(), 400);
+        assertEquals(DTO.createDtoFromJson(response.getBody().asString(), ServiceError.class)
+                        .getMessage(), "Factory configuration required");
+
+    }
 
     // FactoryService#removeFactory(String id) tests:
 
@@ -505,10 +498,10 @@ public class FactoryServiceTest {
         assertEquals(getFromResponse(response, ServiceError.class).getMessage(), errMessage);
     }
 
-    // FactoryService#getFactorySnippet(String factoryId, String type, UriInfo uriInfo) tests:
-//
+    //  FactoryService#getFactorySnippet(String factoryId, String type, UriInfo uriInfo) tests:
+
 //    @Test
-//    public void shouldBeAbleToReturnUrlSnippet(ITestContext context) throws Exception {
+//    public void shouldBeAbleToReturnUrlSnippet() throws Exception {
 //        when(factoryManager.getById(FACTORY_ID)).thenReturn(DTO.createDto(FactoryDto.class));
 //
 //        given().expect()
@@ -1404,7 +1397,7 @@ public class FactoryServiceTest {
                           .setId(FACTORY_ID)
                           .setVersion("4.0")
                           .setWorkspace(createWorkspaceConfig(type, location))
-                          .setCreator(new AuthorImpl(12L, USER_ID))
+                          .setCreator(new AuthorImpl(USER_ID, 12L))
                           .build();
     }
 

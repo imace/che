@@ -11,23 +11,24 @@
 package org.eclipse.che.api.core.model.factory;
 
 /**
- * Describe IDE interface Look and Feel
+ * Defines IDE interface Look and Feel.
  *
  * @author Anton Korneta
  */
 public interface Ide {
+
     /**
-     * @return configuration of IDE on application loaded event.
+     * Returns configuration of IDE on application loaded event
      */
     OnAppLoaded getOnAppLoaded();
 
     /**
-     * @return configuration of IDE on application closed event.
+     * Returns configuration of IDE on application closed event
      */
     OnAppClosed getOnAppClosed();
 
     /**
-     * @return configuration of IDE on projects loaded event.
+     * Returns configuration of IDE on projects loaded event
      */
     OnProjectsLoaded getOnProjectsLoaded();
 }

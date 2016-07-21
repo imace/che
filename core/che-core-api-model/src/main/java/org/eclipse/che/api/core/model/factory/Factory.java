@@ -20,14 +20,14 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 public interface Factory {
 
     /**
-     * Returns the identifier of this factory instance.
-     * It is mandatory and unique.
+     * Returns the identifier of this factory instance,
+     * it is mandatory and unique.
      */
     String getId();
 
     /**
-     * Returns the version of this factory instance.
-     * It is mandatory for every factory instance.
+     * Returns the version of this factory instance,
+     * it is mandatory for every factory instance.
      */
     String getV();
 
@@ -38,13 +38,13 @@ public interface Factory {
     String getName();
 
     /**
-     * Returns author of this factory instance.
+     * Returns creator of this factory instance.
      */
     Author getCreator();
 
     /**
-     * Returns a workspace configuration of this factory instance.
-     * It is mandatory for every factory instance.
+     * Returns a workspace configuration of this factory instance,
+     * it is mandatory for every factory instance.
      */
     WorkspaceConfig getWorkspace();
 

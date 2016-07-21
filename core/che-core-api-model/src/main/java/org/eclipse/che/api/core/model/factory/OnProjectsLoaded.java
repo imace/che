@@ -13,13 +13,14 @@ package org.eclipse.che.api.core.model.factory;
 import java.util.List;
 
 /**
- * Describe IDE look and feel on project opened event.
+ * Defines IDE look and feel on project opened event.
  *
  * @author Anton Korneta
  */
 public interface OnProjectsLoaded {
+
     /**
-     * @return actions for current event.
+     * Returns actions for current event.
      */
     List<? extends Action> getActions();
 }

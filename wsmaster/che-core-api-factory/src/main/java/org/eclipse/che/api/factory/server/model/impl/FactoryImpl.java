@@ -155,7 +155,7 @@ public class FactoryImpl implements Factory {
     }
 
     @Override
-    public Policies getPolicies() {
+    public PoliciesImpl getPolicies() {
         return policies;
     }
 
@@ -164,7 +164,7 @@ public class FactoryImpl implements Factory {
     }
 
     @Override
-    public Button getButton() {
+    public ButtonImpl getButton() {
         return button;
     }
 
@@ -257,6 +257,19 @@ public class FactoryImpl implements Factory {
 
         public FactoryImpl build() {
             return new FactoryImpl(id, name, version, workspace, creator, policies, ide, button, images);
+        }
+
+        public FactoryImplBuilder from(FactoryImpl factory) {
+            this.id = factory.getId();
+            this.name = factory.getName();
+            this.version = factory.getV();
+            this.workspace = factory.getWorkspace();
+            this.creator = factory.getCreator();
+            this.policies = factory.getPolicies();
+            this.ide = factory.getIde();
+            this.button = factory.getButton();
+            this.images = factory.getImages();
+            return this;
         }
 
         public FactoryImplBuilder generateId() {

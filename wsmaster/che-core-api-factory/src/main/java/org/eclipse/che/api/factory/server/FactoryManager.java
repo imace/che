@@ -13,6 +13,7 @@ package org.eclipse.che.api.factory.server;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.factory.server.model.impl.AuthorImpl;
 import org.eclipse.che.api.factory.server.model.impl.FactoryImpl;
 import org.eclipse.che.api.factory.server.snippet.SnippetGenerator;
 import org.eclipse.che.api.factory.server.spi.FactoryDao;
@@ -129,7 +130,11 @@ public class FactoryManager {
                                                                                   NotFoundException,
                                                                                   ServerException {
         requireNonNull(update);
-        return factoryDao.update(new FactoryImpl(update, images));
+        final AuthorImpl creator = factoryDao.getById(update.getId()).getCreator();
+        return factoryDao.update(FactoryImpl.builder()
+                                            .from(new FactoryImpl(update, images))
+                                            .setCreator(new AuthorImpl(creator.getUserId(), creator.getCreated()))
+                                            .build());
     }
 
     /**

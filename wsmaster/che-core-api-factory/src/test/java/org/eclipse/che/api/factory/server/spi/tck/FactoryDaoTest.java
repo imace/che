@@ -10,7 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.api.factory.server.spi.tck;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
@@ -36,6 +38,7 @@ import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
+import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.commons.test.tck.TckModuleFactory;
 import org.eclipse.che.commons.test.tck.repository.TckRepository;
 import org.testng.annotations.AfterMethod;
@@ -52,10 +55,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static org.testng.Assert.assertEquals;
-
 
 /**
  * Tests {@link FactoryDao} contract.
@@ -132,26 +135,28 @@ public class FactoryDaoTest {
         update.setV("5_0");
         final long currentTime = System.currentTimeMillis();
         update.setPolicies(new PoliciesImpl("ref", "match", "per-click", currentTime, currentTime + 1000));
-        update.setCreator(new AuthorImpl(currentTime, userId));
+        update.setCreator(new AuthorImpl(userId, currentTime));
         update.setButton(new ButtonImpl(new ButtonAttributesImpl("green", "icon", "opacity 0.9", true),
                                         Button.ButtonType.nologo));
         update.getIde().getOnAppClosed().getActions().add(new ActionImpl("remove file", ImmutableMap.of("file1", "/che/core/pom.xml")));
         update.getIde().getOnAppLoaded().getActions().add(new ActionImpl("edit file", ImmutableMap.of("file2", "/che/core/pom.xml")));
         update.getIde().getOnProjectsLoaded().getActions().add(new ActionImpl("open file", ImmutableMap.of("file2", "/che/pom.xml")));
-//        update.setWorkspace(createWorkspaceConfig(10));
         factoryDao.update(update);
 
         assertEquals(factoryDao.getById(update.getId()), update);
     }
 
+    @Test(expectedExceptions = ConflictException.class)
+    public void shouldThrowConflictExceptionWhenUpdateFactoryWithExistingNameAndUserId() throws Exception {
+        final FactoryImpl update = factories.get(0);
+        update.setName(factories.get(1).getName());
+        update.getCreator().setUserId(factories.get(1).getCreator().getUserId());
+        factoryDao.update(update);
+    }
+
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNpeWhenFactoryUpdateIsNull() throws Exception {
         factoryDao.update(null);
-    }
-
-    @Test(expectedExceptions = ConflictException.class)
-    public void shouldThrowConflictExceptionWhenUpdatingFactoryWithExistingNameAndUserId() throws Exception {
-        throw new ConflictException("qwe");
     }
 
     @Test(expectedExceptions = NotFoundException.class)
@@ -176,12 +181,62 @@ public class FactoryDaoTest {
         factoryDao.getById("non-existing");
     }
 
+    @Test
+    public void shouldGetFactoryByIdAttribute() throws Exception {
+        final FactoryImpl factory = factories.get(0);
+        final List<Pair<String, String>> attributes = ImmutableList.of(Pair.of("id", factory.getId()));
+        final List<FactoryImpl> result = factoryDao.getByAttribute(1, 0, attributes);
+
+        assertEquals(new HashSet<>(result), ImmutableSet.of(factory));
+    }
+
+    @Test(dependsOnMethods = "shouldUpdateFactory")
+    public void shouldFindFactoryByEmbeddedAttributes() throws Exception {
+        final List<Pair<String, String>> attributes = ImmutableList.of(Pair.of("policies.match", "match"),
+                                                                       Pair.of("policies.create", "perClick"),
+                                                                       Pair.of("workspace.defaultEnv", "env1"));
+        final FactoryImpl factory1 = factories.get(1);
+        final FactoryImpl factory3 = factories.get(3);
+        factory1.getPolicies().setCreate("perAccount");
+        factory3.getPolicies().setMatch("update");
+        factoryDao.update(factory1);
+        factoryDao.update(factory3);
+        final List<FactoryImpl> result = factoryDao.getByAttribute(factories.size(), 0, attributes);
+
+        assertEquals(new HashSet<>(result), ImmutableSet.of(factories.get(0), factories.get(2), factories.get(4)));
+    }
+
+    @Test
+    public void shouldFindAllFactoriesWhenAttributesNotSpecified() throws Exception {
+        final List<Pair<String, String>> attributes = emptyList();
+        final List<FactoryImpl> result = factoryDao.getByAttribute(factories.size(), 0, attributes);
+
+        assertEquals(new HashSet<>(result), new HashSet<>(factories));
+    }
+
+    @Test(expectedExceptions = NotFoundException.class, dependsOnMethods = "shouldGetFactoryById")
+    public void shouldRemoveFactory() throws Exception {
+        final String factoryId = factories.get(0).getId();
+        factoryDao.remove(factoryId);
+        factoryDao.getById(factoryId);
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void shouldThrowNpeWhenRemovingNullFactory() throws Exception {
+        factoryDao.remove(null);
+    }
+
+    @Test
+    public void shouldDoNothingWhenRemovingNonExistingFactory() throws Exception {
+        factoryDao.remove("non-existing");
+    }
+
     private static FactoryImpl createFactory(int index) {
         final long timeMs = System.currentTimeMillis();
         final ButtonImpl factoryButton = new ButtonImpl(new ButtonAttributesImpl("red", "logo", "style", true),
                                                         Button.ButtonType.logo);
-        final AuthorImpl creator = new AuthorImpl(timeMs, "id_" + index);
-        final PoliciesImpl policies = new PoliciesImpl("referrer", "match", "create", timeMs, timeMs + 1000);
+        final AuthorImpl creator = new AuthorImpl("id_" + index, timeMs);
+        final PoliciesImpl policies = new PoliciesImpl("referrer", "match", "perClick", timeMs, timeMs + 1000);
         final Set<FactoryImage> images = new HashSet<>();
         final List<ActionImpl> a1 = new ArrayList<>(singletonList(new ActionImpl("id" + index, ImmutableMap.of("key1", "value1"))));
         final OnAppLoadedImpl onAppLoaded = new OnAppLoadedImpl(a1);

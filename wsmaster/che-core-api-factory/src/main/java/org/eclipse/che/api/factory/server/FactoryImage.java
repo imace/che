@@ -13,6 +13,7 @@ package org.eclipse.che.api.factory.server;
 import javax.persistence.Basic;
 import javax.persistence.Embeddable;
 import java.util.Arrays;
+import java.util.Objects;
 
 /** Class to hold image information such as data, name, media type */
 @Embeddable
@@ -75,24 +76,21 @@ public class FactoryImage {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof FactoryImage)) return false;
-
-        FactoryImage that = (FactoryImage)o;
-
-        if (!Arrays.equals(imageData, that.imageData)) return false;
-        if (mediaType != null ? !mediaType.equals(that.mediaType) : that.mediaType != null) return false;
-        if (name != null ? !name.equals(that.name) : that.name != null) return false;
-
-        return true;
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof FactoryImage)) return false;
+        final FactoryImage other = (FactoryImage)obj;
+        return Arrays.equals(imageData, other.imageData)
+               && Objects.equals(mediaType, other.mediaType)
+               && Objects.equals(name, other.name);
     }
 
     @Override
     public int hashCode() {
-        int result = imageData != null ? Arrays.hashCode(imageData) : 0;
-        result = 31 * result + (mediaType != null ? mediaType.hashCode() : 0);
-        result = 31 * result + (name != null ? name.hashCode() : 0);
-        return result;
+        int hash = 7;
+        hash = 31 * hash + Arrays.hashCode(imageData);
+        hash = 31 * hash + Objects.hashCode(mediaType);
+        hash = 31 * hash + Objects.hashCode(name);
+        return hash;
     }
 }

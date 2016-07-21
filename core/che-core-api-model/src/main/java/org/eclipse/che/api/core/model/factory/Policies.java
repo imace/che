@@ -11,15 +11,15 @@
 package org.eclipse.che.api.core.model.factory;
 
 /**
- * Describe restrictions of the factory
+ * Defines factory restrictions.
  *
  * @author Anton Korneta
  */
 public interface Policies {
+
     /**
      * Restrict access if referer header doesn't match this field
      */
-    // Do not change referer to referrer
     String getReferer();
 
     /**

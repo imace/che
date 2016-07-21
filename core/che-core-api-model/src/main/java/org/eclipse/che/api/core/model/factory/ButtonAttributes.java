@@ -11,14 +11,29 @@
 package org.eclipse.che.api.core.model.factory;
 
 /**
- * @author @author Anton Korneta
+ * Defines factory button attributes.
+ *
+ * @author Anton Korneta
  */
 public interface ButtonAttributes {
+
+    /**
+     * Returns factory button color
+     */
     String getColor();
 
+    /**
+     * Returns factory button counter
+     */
     Boolean getCounter();
 
+    /**
+     * Returns factory button logo
+     */
     String getLogo();
 
+    /**
+     * Returns factory button style
+     */
     String getStyle();
 }

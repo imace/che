@@ -19,12 +19,16 @@ import org.eclipse.che.api.core.jdbc.jpa.DuplicateKeyException;
 import org.eclipse.che.api.core.jdbc.jpa.IntegrityConstraintViolationException;
 import org.eclipse.che.api.factory.server.model.impl.FactoryImpl;
 import org.eclipse.che.api.factory.server.spi.FactoryDao;
+import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.lang.Pair;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.persistence.EntityManager;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.StringJoiner;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
@@ -93,8 +97,31 @@ public class JpaFactoryDao implements FactoryDao {
     public List<FactoryImpl> getByAttribute(int maxItems,
                                             int skipCount,
                                             List<Pair<String, String>> attributes) throws ServerException {
-
-        return null;
+        try {
+            final Map<String, Pair<String, String>> params = new HashMap<>();
+            for (Pair<String, String> attribute : attributes) {
+                params.put(NameGenerator.generate("att", 3), attribute);
+            }
+            String query = "Select factory From Factory factory%1$2s %2$2s";
+            if (!params.isEmpty()) {
+                final StringJoiner from = new StringJoiner(", ", ", ", "");
+                final StringJoiner where = new StringJoiner(" AND ", "Where ", " ");
+                for (Map.Entry<String, Pair<String, String>> entry : params.entrySet()) {
+                    from.add(format("factory.%1$2s %2$2s", entry.getValue().first, entry.getKey()));
+                    where.add(entry.getKey() + " = '" + entry.getValue().second + "'");
+                }
+                query = format(query, from, where);
+            } else {
+                query = format(query, "", "");
+            }
+            return managerProvider.get()
+                                  .createQuery(query, FactoryImpl.class)
+                                  .setFirstResult(skipCount)
+                                  .setMaxResults(maxItems)
+                                  .getResultList();
+        } catch (RuntimeException ex) {
+            throw new ServerException(ex.getLocalizedMessage(), ex);
+        }
     }
 
     @Transactional
@@ -116,6 +143,9 @@ public class JpaFactoryDao implements FactoryDao {
     @Transactional
     protected void doRemove(String id) {
         final EntityManager manager = managerProvider.get();
-        manager.remove(manager.find(FactoryImpl.class, id));
+        final FactoryImpl factory = manager.find(FactoryImpl.class, id);
+        if (factory != null) {
+            manager.remove(factory);
+        }
     }
 }

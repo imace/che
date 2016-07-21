@@ -298,13 +298,10 @@ public class FactoryService extends Service {
                                                               ForbiddenException,
                                                               ConflictException {
         requiredNotNull(update, "Factory configuration");
+        update.setId(factoryId);
         final Factory existing = factoryManager.getById(factoryId);
         // check if the current user has enough access to edit the factory
         editValidator.validate(existing);
-        update.withId(factoryId)
-              .getCreator()
-              .withUserId(existing.getCreator().getUserId())
-              .setCreated(existing.getCreator().getCreated());
         // validate the new content
         createValidator.validateOnCreate(update);
         return injectLinks(asDto(factoryManager.updateFactory(update)),
