@@ -23,10 +23,6 @@ import javax.inject.Singleton;
  */
 @Singleton
 public class FactoryAcceptValidatorImpl extends FactoryBaseValidator implements FactoryAcceptValidator {
-    @Inject
-    public FactoryAcceptValidatorImpl(PreferenceDao preferenceDao) {
-        super(preferenceDao);
-    }
 
     @Override
     public void validateOnAccept(FactoryDto factory) throws BadRequestException {

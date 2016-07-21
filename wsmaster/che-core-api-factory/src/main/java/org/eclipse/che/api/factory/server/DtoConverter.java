@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.factory.server;
 
+import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.factory.shared.dto.AuthorDto;
 import org.eclipse.che.api.factory.shared.dto.ButtonAttributesDto;
 import org.eclipse.che.api.factory.shared.dto.ButtonDto;
@@ -43,7 +44,7 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
  */
 public final class DtoConverter {
 
-    public static FactoryDto asDto(Factory factory) {
+    public static FactoryDto asDto(Factory factory, User user) {
         final FactoryDto factoryDto = newDto(FactoryDto.class).withId(factory.getId())
                                                               .withName(factory.getName())
                                                               .withV(factory.getV());
@@ -52,7 +53,7 @@ public final class DtoConverter {
             factoryDto.withWorkspace(org.eclipse.che.api.workspace.server.DtoConverter.asDto(factory.getWorkspace()));
         }
         if (factory.getCreator() != null) {
-            factoryDto.withCreator(asDto(factory.getCreator()));
+            factoryDto.withCreator(asDto(factory.getCreator(), user));
         }
         if (factory.getIde() != null) {
             factoryDto.withIde(asDto(factory.getIde()));
@@ -83,10 +84,10 @@ public final class DtoConverter {
         return ideDto;
     }
 
-    public static AuthorDto asDto(Author author) {
+    public static AuthorDto asDto(Author author, User user) {
         return newDto(AuthorDto.class).withUserId(author.getUserId())
-                                      .withName(author.getName())
-                                      .withEmail(author.getEmail())
+                                      .withName(user.getName())
+                                      .withEmail(user.getEmail())
                                       .withCreated(author.getCreated());
     }
 

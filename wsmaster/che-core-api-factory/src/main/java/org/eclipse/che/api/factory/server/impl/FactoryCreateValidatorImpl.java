@@ -29,9 +29,7 @@ public class FactoryCreateValidatorImpl extends FactoryBaseValidator implements 
     private WorkspaceValidator workspaceConfigValidator;
 
     @Inject
-    public FactoryCreateValidatorImpl(PreferenceDao preferenceDao,
-                                      WorkspaceValidator workspaceConfigValidator) {
-        super(preferenceDao);
+    public FactoryCreateValidatorImpl(WorkspaceValidator workspaceConfigValidator) {
         this.workspaceConfigValidator = workspaceConfigValidator;
     }
 
@@ -40,7 +38,6 @@ public class FactoryCreateValidatorImpl extends FactoryBaseValidator implements 
                                                             ServerException,
                                                             ForbiddenException {
         validateProjects(factory);
-        validateAccountId(factory);
         validateCurrentTimeAfterSinceUntil(factory);
         validateProjectActions(factory);
         workspaceConfigValidator.validateConfig(factory.getWorkspace());

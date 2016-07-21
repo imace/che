@@ -35,5 +35,5 @@ public interface FactoryCreateValidator {
      * @throws ForbiddenException
      *         when user have no access rights for factory creation
      */
-    void    validateOnCreate(FactoryDto factory) throws BadRequestException, ServerException, ForbiddenException;
+    void validateOnCreate(FactoryDto factory) throws BadRequestException, ServerException, ForbiddenException;
 }

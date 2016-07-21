@@ -25,26 +25,6 @@ import static org.eclipse.che.api.core.factory.FactoryParameter.Obligation.OPTIO
 public interface AuthorDto extends Author {
 
     /**
-     * Name of the author
-     */
-    @FactoryParameter(obligation = OPTIONAL)
-    String getName();
-
-    void setName(String name);
-
-    AuthorDto withName(String name);
-
-    /**
-     * Email of the author
-     */
-    @FactoryParameter(obligation = OPTIONAL)
-    String getEmail();
-
-    void setEmail(String email);
-
-    AuthorDto withEmail(String email);
-
-    /**
      * Id of user that create factory, set by the server
      */
     @FactoryParameter(obligation = OPTIONAL, setByServer = true)
@@ -63,4 +43,24 @@ public interface AuthorDto extends Author {
     void setCreated(Long created);
 
     AuthorDto withCreated(Long created);
+
+    /**
+     * Name of the author
+     */
+    @FactoryParameter(obligation = OPTIONAL)
+    String getName();
+
+    void setName(String name);
+
+    AuthorDto withName(String name);
+
+    /**
+     * Email of the author
+     */
+    @FactoryParameter(obligation = OPTIONAL)
+    String getEmail();
+
+    void setEmail(String email);
+
+    AuthorDto withEmail(String email);
 }

@@ -26,7 +26,6 @@ import org.eclipse.che.api.factory.server.model.impl.OnAppLoadedImpl;
 import org.eclipse.che.api.factory.server.model.impl.OnProjectsLoadedImpl;
 import org.eclipse.che.api.factory.server.model.impl.PoliciesImpl;
 import org.eclipse.che.api.factory.server.spi.FactoryDao;
-import org.eclipse.che.api.factory.shared.model.Action;
 import org.eclipse.che.api.factory.shared.model.Button;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
 import org.eclipse.che.api.machine.server.model.impl.LimitsImpl;
@@ -133,7 +132,7 @@ public class FactoryDaoTest {
         update.setV("5_0");
         final long currentTime = System.currentTimeMillis();
         update.setPolicies(new PoliciesImpl("ref", "match", "per-click", currentTime, currentTime + 1000));
-        update.setCreator(new AuthorImpl(currentTime, "username", userId, "new-email"));
+        update.setCreator(new AuthorImpl(currentTime, userId));
         update.setButton(new ButtonImpl(new ButtonAttributesImpl("green", "icon", "opacity 0.9", true),
                                         Button.ButtonType.nologo));
         update.getIde().getOnAppClosed().getActions().add(new ActionImpl("remove file", ImmutableMap.of("file1", "/che/core/pom.xml")));
@@ -181,7 +180,7 @@ public class FactoryDaoTest {
         final long timeMs = System.currentTimeMillis();
         final ButtonImpl factoryButton = new ButtonImpl(new ButtonAttributesImpl("red", "logo", "style", true),
                                                         Button.ButtonType.logo);
-        final AuthorImpl creator = new AuthorImpl(timeMs, "name_" + index, "id_" + index, "email_" + index);
+        final AuthorImpl creator = new AuthorImpl(timeMs, "id_" + index);
         final PoliciesImpl policies = new PoliciesImpl("referrer", "match", "create", timeMs, timeMs + 1000);
         final Set<FactoryImage> images = new HashSet<>();
         final List<ActionImpl> a1 = new ArrayList<>(singletonList(new ActionImpl("id" + index, ImmutableMap.of("key1", "value1"))));

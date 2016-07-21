@@ -10,13 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.factory.server;
 
-import org.eclipse.che.api.core.ConflictException;
-
 import javax.persistence.Basic;
 import javax.persistence.Embeddable;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Arrays;
 
 /** Class to hold image information such as data, name, media type */
@@ -99,41 +94,5 @@ public class FactoryImage {
         result = 31 * result + (mediaType != null ? mediaType.hashCode() : 0);
         result = 31 * result + (name != null ? name.hashCode() : 0);
         return result;
-    }
-
-    /**
-     * Creates {@code FactoryImage}.
-     * InputStream should be closed manually.
-     *
-     * @param is
-     *         - input stream with image data
-     * @param mediaType
-     *         - media type of image
-     * @param name
-     *         - image name
-     * @return - {@code FactoryImage} if {@code FactoryImage} was created, null if input stream has no content
-     * @throws org.eclipse.che.api.core.ConflictException
-     */
-    public static FactoryImage createImage(InputStream is, String mediaType, String name) throws ConflictException {
-        try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            byte[] buffer = new byte[1024];
-            int read;
-            while ((read = is.read(buffer, 0, buffer.length)) != -1) {
-                baos.write(buffer, 0, read);
-                if (baos.size() > 1024 * 1024) {
-                    throw new ConflictException("Maximum upload size exceeded.");
-                }
-            }
-
-            if (baos.size() == 0) {
-                return new FactoryImage();
-            }
-            baos.flush();
-
-            return new FactoryImage(baos.toByteArray(), mediaType, name);
-        } catch (IOException e) {
-            throw new ConflictException(e.getLocalizedMessage());
-        }
     }
 }

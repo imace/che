@@ -54,8 +54,8 @@ public class FactoryCreateAndAcceptValidatorsImplsTest {
     @BeforeMethod
     public void setUp() throws Exception {
 
-        acceptValidator = new FactoryAcceptValidatorImpl(preferenceDao);
-        createValidator = new FactoryCreateValidatorImpl(preferenceDao, workspaceConfigValidator);
+        acceptValidator = new FactoryAcceptValidatorImpl();
+        createValidator = new FactoryCreateValidatorImpl(workspaceConfigValidator);
     }
 
     @Test
@@ -63,8 +63,6 @@ public class FactoryCreateAndAcceptValidatorsImplsTest {
         FactoryCreateValidatorImpl spy = spy(createValidator);
         doNothing().when(spy)
                    .validateProjects(any(FactoryDto.class));
-        doNothing().when(spy)
-                   .validateAccountId(any(FactoryDto.class));
         doNothing().when(spy)
                    .validateCurrentTimeAfterSinceUntil(any(FactoryDto.class));
         doNothing().when(spy)
@@ -76,7 +74,6 @@ public class FactoryCreateAndAcceptValidatorsImplsTest {
         spy.validateOnCreate(factory);
 
         verify(spy).validateProjects(any(FactoryDto.class));
-        verify(spy).validateAccountId(any(FactoryDto.class));
         verify(spy).validateCurrentTimeAfterSinceUntil(any(FactoryDto.class));
         verify(spy).validateOnCreate(any(FactoryDto.class));
         verify(spy).validateProjectActions(any(FactoryDto.class));

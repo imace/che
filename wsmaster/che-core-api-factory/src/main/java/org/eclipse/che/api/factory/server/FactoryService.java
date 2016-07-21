@@ -27,11 +27,13 @@ import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.project.ProjectConfig;
+import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.factory.server.builder.FactoryBuilder;
 import org.eclipse.che.api.factory.shared.dto.AuthorDto;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.factory.shared.model.Factory;
+import org.eclipse.che.api.user.server.PreferenceManager;
 import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
@@ -40,7 +42,6 @@ import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.commons.lang.URLEncodedUtils;
-import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,8 +60,10 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -68,15 +71,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.lang.Boolean.parseBoolean;
 import static java.util.stream.Collectors.toList;
 import static javax.ws.rs.core.HttpHeaders.CONTENT_DISPOSITION;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
-import static org.eclipse.che.api.factory.server.DtoConverter.asDto;
 import static org.eclipse.che.api.factory.server.FactoryLinksHelper.createLinks;
 
 /**
@@ -108,6 +110,7 @@ public class FactoryService extends Service {
 
     private final FactoryManager         factoryManager;
     private final UserManager            userManager;
+    private final PreferenceManager      preferenceManager;
     private final FactoryEditValidator   editValidator;
     private final FactoryCreateValidator createValidator;
     private final FactoryAcceptValidator acceptValidator;
@@ -117,6 +120,7 @@ public class FactoryService extends Service {
     @Inject
     public FactoryService(FactoryManager factoryManager,
                           UserManager userManager,
+                          PreferenceManager preferenceManager,
                           FactoryCreateValidator createValidator,
                           FactoryAcceptValidator acceptValidator,
                           FactoryEditValidator editValidator,
@@ -126,6 +130,7 @@ public class FactoryService extends Service {
         this.factoryManager = factoryManager;
         this.userManager = userManager;
         this.createValidator = createValidator;
+        this.preferenceManager = preferenceManager;
         this.acceptValidator = acceptValidator;
         this.editValidator = editValidator;
         this.factoryBuilder = factoryBuilder;
@@ -163,9 +168,9 @@ public class FactoryService extends Service {
                     }
                     case ("image"): {
                         try (InputStream imageData = item.getInputStream()) {
-                            final FactoryImage image = FactoryImage.createImage(imageData,
-                                                                                item.getContentType(),
-                                                                                NameGenerator.generate(null, 16));
+                            final FactoryImage image = createImage(imageData,
+                                                                   item.getContentType(),
+                                                                   NameGenerator.generate(null, 16));
                             if (image.hasContent()) {
                                 images.add(image);
                             }
@@ -176,7 +181,7 @@ public class FactoryService extends Service {
                         //DO NOTHING
                 }
             }
-            requiredNotNull(factoryDto, "'factory' section of multipart/form-data");
+            requiredNotNull(factoryDto, "factory configuration");
             processDefaults(factoryDto);
             createValidator.validateOnCreate(factoryDto);
             return injectLinks(asDto(factoryManager.saveFactory(factoryDto, images)), images);
@@ -262,10 +267,12 @@ public class FactoryService extends Service {
         if (query.isEmpty()) {
             throw new BadRequestException("Query must contain at least one attribute");
         }
-        return factoryManager.getByAttribute(maxItems, skipCount, query)
-                             .stream()
-                             .map(factory -> injectLinks(asDto(factory), null))
-                             .collect(Collectors.toList());
+
+        final List<FactoryDto> factories = new ArrayList<>();
+        for (Factory factory : factoryManager.getByAttribute(maxItems, skipCount, query)) {
+            factories.add(injectLinks(asDto(factory), null));
+        }
+        return factories;
     }
 
     @PUT
@@ -291,15 +298,13 @@ public class FactoryService extends Service {
                                                               ForbiddenException,
                                                               ConflictException {
         requiredNotNull(update, "Factory configuration");
-        final Factory existingFactory = factoryManager.getById(factoryId);
+        final Factory existing = factoryManager.getById(factoryId);
         // check if the current user has enough access to edit the factory
-        editValidator.validate(existingFactory);
-
-        processDefaults(update);
+        editValidator.validate(existing);
         update.withId(factoryId)
               .getCreator()
-              .setCreated(existingFactory.getCreator().getCreated());
-
+              .withUserId(existing.getCreator().getUserId())
+              .setCreated(existing.getCreator().getCreated());
         // validate the new content
         createValidator.validateOnCreate(update);
         return injectLinks(asDto(factoryManager.updateFactory(update)),
@@ -443,9 +448,7 @@ public class FactoryService extends Service {
     }
 
     /**
-     * Injects factory links.
-     *
-     * If factory is named then accept named link will be injected,
+     * Injects factory links. If factory is named then accept named link will be injected,
      * if images set is not null and not empty then image links will be injected
      */
     private FactoryDto injectLinks(FactoryDto factory, Set<FactoryImage> images) {
@@ -492,23 +495,34 @@ public class FactoryService extends Service {
     }
 
     /**
-     * Adds to the factory information about creator and time of creation
+     * Checks the current user if it is not temporary then
+     * adds to the factory creator information and time of creation
      */
-    private void processDefaults(FactoryDto factory) {
-        final Subject currentSubject = EnvironmentContext.getCurrent().getSubject();
-        final AuthorDto creator = factory.getCreator();
-        if (creator == null) {
+    private void processDefaults(FactoryDto factory) throws ForbiddenException {
+        try {
+            final String userId = EnvironmentContext.getCurrent().getSubject().getUserId();
+            final User user = userManager.getById(userId);
+            if (user == null || parseBoolean(preferenceManager.find(userId).get("temporary"))) {
+                throw new ForbiddenException("Current user is not allowed to use this method.");
+            }
             factory.setCreator(DtoFactory.newDto(AuthorDto.class)
-                                         .withUserId(currentSubject.getUserId())
-                                         .withName(currentSubject.getUserName())
+                                         .withUserId(userId)
+                                         .withName(user.getName())
+                                         .withEmail(user.getEmail())
                                          .withCreated(System.currentTimeMillis()));
-            return;
+        } catch (NotFoundException | ServerException ex) {
+            throw new ForbiddenException("Current user is not allowed to use this method");
         }
-        if (isNullOrEmpty(creator.getUserId())) {
-            creator.setUserId(currentSubject.getUserId());
-        }
-        if (creator.getCreated() == null) {
-            creator.setCreated(System.currentTimeMillis());
+    }
+
+    /**
+     * Converts {@link Factory} to dto object
+     */
+    private FactoryDto asDto(Factory factory) throws ServerException {
+        try {
+            return DtoConverter.asDto(factory, userManager.getById(factory.getCreator().getUserId()));
+        } catch (ServerException | NotFoundException ex) {
+            throw new ServerException("Failed to retrieve factory creator");
         }
     }
 
@@ -550,6 +564,46 @@ public class FactoryService extends Service {
     private void requiredNotNull(Object object, String subject) throws BadRequestException {
         if (object == null) {
             throw new BadRequestException(subject + " required");
+        }
+    }
+
+    /**
+     * Creates factory image from input stream.
+     * InputStream should be closed manually.
+     *
+     * @param is
+     *         input stream with image data
+     * @param mediaType
+     *         media type of image
+     * @param name
+     *         image name
+     * @return factory image, if {@param is} has no content then empty factory image will be returned
+     * @throws BadRequestException
+     *         when factory image exceeded maximum size
+     * @throws ServerException
+     *         when any server errors occurs
+     */
+    public static FactoryImage createImage(InputStream is, String mediaType, String name) throws BadRequestException,
+                                                                                                 ServerException {
+        try {
+            final ByteArrayOutputStream out = new ByteArrayOutputStream();
+            final byte[] buffer = new byte[1024];
+            int read;
+            while ((read = is.read(buffer, 0, buffer.length)) != -1) {
+                out.write(buffer, 0, read);
+                if (out.size() > 1024 * 1024) {
+                    throw new BadRequestException("Maximum upload size exceeded.");
+                }
+            }
+
+            if (out.size() == 0) {
+                return new FactoryImage();
+            }
+            out.flush();
+
+            return new FactoryImage(out.toByteArray(), mediaType, name);
+        } catch (IOException ioEx) {
+            throw new ServerException(ioEx.getLocalizedMessage());
         }
     }
 }

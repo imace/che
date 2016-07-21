@@ -61,8 +61,7 @@ public class FactoryImpl implements Factory {
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, optional = false)
     private WorkspaceConfigImpl workspace;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, optional = false)
-
+    @Embedded
     private AuthorImpl creator;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)

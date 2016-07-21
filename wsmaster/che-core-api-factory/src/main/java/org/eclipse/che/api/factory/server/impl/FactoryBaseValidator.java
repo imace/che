@@ -11,16 +11,13 @@
 package org.eclipse.che.api.factory.server.impl;
 
 import org.eclipse.che.api.core.BadRequestException;
-import org.eclipse.che.api.core.ForbiddenException;
-import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.factory.server.FactoryConstants;
-import org.eclipse.che.api.factory.shared.dto.IdeActionDto;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
+import org.eclipse.che.api.factory.shared.dto.IdeActionDto;
 import org.eclipse.che.api.factory.shared.dto.IdeDto;
 import org.eclipse.che.api.factory.shared.dto.OnAppLoadedDto;
 import org.eclipse.che.api.factory.shared.dto.OnProjectsLoadedDto;
 import org.eclipse.che.api.factory.shared.dto.PoliciesDto;
-import org.eclipse.che.api.user.server.spi.PreferenceDao;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 
 import java.io.UnsupportedEncodingException;
@@ -31,7 +28,6 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static java.lang.Boolean.parseBoolean;
 import static java.lang.String.format;
 import static java.lang.System.currentTimeMillis;
 
@@ -43,12 +39,6 @@ import static java.lang.System.currentTimeMillis;
  */
 public abstract class FactoryBaseValidator {
     private static final Pattern PROJECT_NAME_VALIDATOR = Pattern.compile("^[\\\\\\w\\\\\\d]+[\\\\\\w\\\\\\d_.-]*$");
-
-    private final PreferenceDao preferenceDao;
-
-    public FactoryBaseValidator(PreferenceDao preferenceDao) {
-        this.preferenceDao = preferenceDao;
-    }
 
     /**
      * Validates source parameter of factory.
@@ -87,31 +77,6 @@ public abstract class FactoryBaseValidator {
                 }
             }
         }
-    }
-
-    /**
-     * Validates that creator of factory is really owner of account specified in it.
-     *
-     * @param factory
-     *         factory to validate
-     * @throws ServerException
-     *         when any server errors occurs
-     * @throws ForbiddenException
-     *         when user does not have required rights
-     */
-    protected void validateAccountId(FactoryDto factory) throws ServerException, ForbiddenException {
-        // TODO do we need check if user is temporary?
-        final String userId = factory.getCreator() != null ? factory.getCreator().getUserId() : null;
-
-        if (userId == null) {
-            return;
-        }
-
-        final Map<String, String> preferences = preferenceDao.getPreferences(userId);
-        if (parseBoolean(preferences.get("temporary"))) {
-            throw new ForbiddenException("Current user is not allowed to use this method.");
-        }
-
     }
 
     /**

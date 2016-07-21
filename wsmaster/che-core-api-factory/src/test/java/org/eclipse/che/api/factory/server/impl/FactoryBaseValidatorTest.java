@@ -85,7 +85,7 @@ public class FactoryBaseValidatorTest {
         final UserImpl user = new UserImpl("userid");
 
         when(userDao.getById("userid")).thenReturn(user);
-        validator = new TesterFactoryBaseValidator(preferenceDao);
+        validator = new TesterFactoryBaseValidator();
     }
 
     @Test
@@ -93,7 +93,6 @@ public class FactoryBaseValidatorTest {
         factory = prepareFactoryWithGivenStorage("git", VALID_REPOSITORY_URL, VALID_PROJECT_PATH);
         validator.validateProjects(factory);
         validator.validateProjects(factory);
-        validator.validateAccountId(factory);
     }
 
     @Test
@@ -101,7 +100,6 @@ public class FactoryBaseValidatorTest {
         factory = prepareFactoryWithGivenStorage("esbwso2", VALID_REPOSITORY_URL, VALID_PROJECT_PATH);
         validator.validateProjects(factory);
         validator.validateProjects(factory);
-        validator.validateAccountId(factory);
     }
 
     @Test(expectedExceptions = ApiException.class,
@@ -218,17 +216,6 @@ public class FactoryBaseValidatorTest {
         };
     }
 
-    @Test
-    public void shouldBeAbleToValidateIfOrgIdIsValid() throws ApiException, ParseException {
-        validator.validateAccountId(factory);
-    }
-
-    @Test
-    public void shouldBeAbleToValidateIfOrgIdAndOwnerAreValid()
-            throws ApiException, ParseException {
-        // when, then
-        validator.validateAccountId(factory);
-    }
 
     @Test
     public void shouldValidateIfCurrentTimeBeforeSinceUntil() throws Exception {
@@ -307,16 +294,14 @@ public class FactoryBaseValidatorTest {
                                        .withSince(System.currentTimeMillis() + 1_000_000)
                                        .withUntil(System.currentTimeMillis() + 10_000_000)
                                        .withReferer("codenvy.com"));
-        validator = new TesterFactoryBaseValidator(preferenceDao);
-
-        validator.validateAccountId(factory);
+        validator = new TesterFactoryBaseValidator();
     }
 
 
     @Test(expectedExceptions = BadRequestException.class)
     public void shouldNotValidateOpenfileActionIfInWrongSectionOnAppClosed() throws Exception {
         //given
-        validator = new TesterFactoryBaseValidator(preferenceDao);
+        validator = new TesterFactoryBaseValidator();
         List<IdeActionDto> actions = Arrays.asList(newDto(IdeActionDto.class)
                                                      .withId("openFile"));
         IdeDto ide = newDto(IdeDto.class)
@@ -330,7 +315,7 @@ public class FactoryBaseValidatorTest {
     @Test(expectedExceptions = BadRequestException.class)
     public void shouldNotValidateFindReplaceActionIfInWrongSectionOnAppLoaded() throws Exception {
         //given
-        validator = new TesterFactoryBaseValidator(preferenceDao);
+        validator = new TesterFactoryBaseValidator();
         List<IdeActionDto> actions = Arrays.asList(newDto(IdeActionDto.class)
                                                      .withId("findReplace"));
         IdeDto ide = newDto(IdeDto.class)
@@ -344,7 +329,7 @@ public class FactoryBaseValidatorTest {
     @Test(expectedExceptions = BadRequestException.class)
     public void shouldNotValidateIfOpenfileActionInsufficientParams() throws Exception {
         //given
-        validator = new TesterFactoryBaseValidator(preferenceDao);
+        validator = new TesterFactoryBaseValidator();
         List<IdeActionDto> actions = Arrays.asList(newDto(IdeActionDto.class)
                                                      .withId("openFile"));
         IdeDto ide = newDto(IdeDto.class)
@@ -358,7 +343,7 @@ public class FactoryBaseValidatorTest {
     @Test(expectedExceptions = BadRequestException.class)
     public void shouldNotValidateIfrunCommandActionInsufficientParams() throws Exception {
         //given
-        validator = new TesterFactoryBaseValidator(preferenceDao);
+        validator = new TesterFactoryBaseValidator();
         List<IdeActionDto> actions = Arrays.asList(newDto(IdeActionDto.class)
                                                      .withId("openFile"));
         IdeDto ide = newDto(IdeDto.class)
@@ -372,7 +357,7 @@ public class FactoryBaseValidatorTest {
     @Test(expectedExceptions = BadRequestException.class)
     public void shouldNotValidateIfOpenWelcomePageActionInsufficientParams() throws Exception {
         //given
-        validator = new TesterFactoryBaseValidator(preferenceDao);
+        validator = new TesterFactoryBaseValidator();
         List<IdeActionDto> actions = Arrays.asList(newDto(IdeActionDto.class)
                                                      .withId("openWelcomePage"));
         IdeDto ide = newDto(IdeDto.class)
@@ -386,7 +371,7 @@ public class FactoryBaseValidatorTest {
     @Test(expectedExceptions = BadRequestException.class)
     public void shouldNotValidateIfFindReplaceActionInsufficientParams() throws Exception {
         //given
-        validator = new TesterFactoryBaseValidator(preferenceDao);
+        validator = new TesterFactoryBaseValidator();
         Map<String, String> params = new HashMap<>();
         params.put("in", "pom.xml");
         // find is missing!
@@ -405,7 +390,7 @@ public class FactoryBaseValidatorTest {
     @Test
     public void shouldValidateFindReplaceAction() throws Exception {
         //given
-        validator = new TesterFactoryBaseValidator(preferenceDao);
+        validator = new TesterFactoryBaseValidator();
         Map<String, String> params = new HashMap<>();
         params.put("in", "pom.xml");
         params.put("find", "123");
@@ -424,7 +409,7 @@ public class FactoryBaseValidatorTest {
     @Test
     public void shouldValidateOpenfileAction() throws Exception {
         //given
-        validator = new TesterFactoryBaseValidator(preferenceDao);
+        validator = new TesterFactoryBaseValidator();
         Map<String, String> params = new HashMap<>();
         params.put("file", "pom.xml");
         List<IdeActionDto> actions = Arrays.asList(newDto(IdeActionDto.class)

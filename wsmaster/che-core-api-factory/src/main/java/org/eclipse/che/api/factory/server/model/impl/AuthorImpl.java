@@ -14,7 +14,6 @@ import org.eclipse.che.api.factory.shared.model.Author;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 
 import javax.persistence.Basic;
-import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
@@ -31,9 +30,6 @@ public class AuthorImpl implements Author {
     @Basic
     private Long created;
 
-    @Column(name = "author_name")
-    private String name;
-
     @Basic
     private String userId;
 
@@ -41,26 +37,17 @@ public class AuthorImpl implements Author {
     @JoinColumn(insertable = false, updatable = false, name = "userId", referencedColumnName = "id")
     private UserImpl userEntity;
 
-    @Basic
-    private String email;
-
     public AuthorImpl() {}
 
     public AuthorImpl(Long created,
-                      String name,
-                      String userId,
-                      String email) {
+                      String userId) {
         this.created = created;
-        this.name = name;
         this.userId = userId;
-        this.email = email;
     }
 
     public AuthorImpl(Author creator) {
         this(creator.getCreated(),
-             creator.getName(),
-             creator.getUserId(),
-             creator.getEmail());
+             creator.getUserId());
     }
 
     @Override
@@ -73,15 +60,6 @@ public class AuthorImpl implements Author {
     }
 
     @Override
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    @Override
     public String getUserId() {
         return userId;
     }
@@ -91,30 +69,17 @@ public class AuthorImpl implements Author {
     }
 
     @Override
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (!(obj instanceof AuthorImpl)) return false;
         final AuthorImpl other = (AuthorImpl)obj;
         return Objects.equals(userId, other.userId)
-               && Objects.equals(name, other.name)
-               && Objects.equals(email, other.email)
                && Objects.equals(created, other.created);
     }
 
     @Override
     public int hashCode() {
         int result = 7;
-        result = 31 * result + Objects.hashCode(name);
-        result = 31 * result + Objects.hashCode(email);
         result = 31 * result + Objects.hashCode(userId);
         result = 31 * result + Long.hashCode(created);
         return result;
@@ -124,9 +89,7 @@ public class AuthorImpl implements Author {
     public String toString() {
         return "AuthorImpl{" +
                "created=" + created +
-               ", name='" + name + '\'' +
                ", userId='" + userId + '\'' +
-               ", email='" + email + '\'' +
                '}';
     }
 }

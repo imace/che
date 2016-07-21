@@ -78,12 +78,10 @@ public class JpaFactoryDao implements FactoryDao {
     public FactoryImpl getById(String id) throws NotFoundException, ServerException {
         requireNonNull(id);
         try {
-            final EntityManager manager = managerProvider.get();
-            final FactoryImpl factory = manager.find(FactoryImpl.class, id);
+            final FactoryImpl factory = managerProvider.get().find(FactoryImpl.class, id);
             if (factory == null) {
                 throw new NotFoundException(format("Factory with id '%s' doesn't exist", id));
             }
-            manager.refresh(factory);
             return factory;
         } catch (RuntimeException ex) {
             throw new ServerException(ex.getLocalizedMessage(), ex);
@@ -103,9 +101,7 @@ public class JpaFactoryDao implements FactoryDao {
     protected FactoryImpl doCreate(FactoryImpl factory) {
         final EntityManager manager = managerProvider.get();
         manager.persist(factory);
-        final FactoryImpl created = manager.find(FactoryImpl.class, factory.getId());
-        manager.refresh(created);
-        return created;
+        return manager.find(FactoryImpl.class, factory.getId());
     }
 
     @Transactional
@@ -114,9 +110,7 @@ public class JpaFactoryDao implements FactoryDao {
         if (manager.find(FactoryImpl.class, update.getId()) == null) {
             throw new NotFoundException(format("Could not update factory with id %s because it doesn't exist", update.getId()));
         }
-        final FactoryImpl updated = manager.merge(update);
-        manager.refresh(updated);
-        return updated;
+        return manager.merge(update);
     }
 
     @Transactional

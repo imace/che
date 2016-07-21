@@ -11,14 +11,14 @@
 package org.eclipse.che.api.factory.shared.model;
 
 /**
- * Describes author of the factory
+ * Describes author of the factory.
  *
  * @author Anton Korneta
  */
 public interface Author {
 
     /**
-     * Identifier of the user who created factory, it is mandatory.
+     * Identifier of the user who created factory, it is mandatory
      */
     String getUserId();
 

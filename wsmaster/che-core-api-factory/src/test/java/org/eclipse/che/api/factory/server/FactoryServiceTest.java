@@ -11,6 +11,7 @@
 package org.eclipse.che.api.factory.server;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.gson.JsonSyntaxException;
 import com.jayway.restassured.http.ContentType;
@@ -18,6 +19,7 @@ import com.jayway.restassured.response.Response;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.project.ProjectConfig;
+import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
@@ -31,6 +33,7 @@ import org.eclipse.che.api.factory.shared.model.Factory;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
 import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
+import org.eclipse.che.api.user.server.PreferenceManager;
 import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
@@ -44,7 +47,6 @@ import org.eclipse.che.commons.json.JsonHelper;
 import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.everrest.assured.EverrestJetty;
-import org.everrest.assured.JettyHttpServer;
 import org.everrest.core.Filter;
 import org.everrest.core.GenericContainerRequest;
 import org.everrest.core.RequestFilter;
@@ -88,7 +90,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
@@ -109,9 +110,6 @@ public class FactoryServiceTest {
 
     private static final DtoFactory DTO = DtoFactory.getInstance();
 
-    @SuppressWarnings("unused")
-    private ApiExceptionMapper apiExceptionMapper;
-
     private final String SERVICE_PATH_RESOLVER = SERVICE_PATH + "/resolver";
 
     @Mock
@@ -121,11 +119,13 @@ public class FactoryServiceTest {
     @Mock
     private FactoryAcceptValidator          acceptValidator;
     @Mock
+    private PreferenceManager               preferenceManager;
+    @Mock
+    private UserManager                     userManager;
+    @Mock
     private FactoryEditValidator            editValidator;
     @Mock
     private WorkspaceManager                workspaceManager;
-    @Mock
-    private UserManager                     userManager;
     @Mock
     private FactoryParametersResolverHolder factoryParametersResolverHolder;
     @Mock
@@ -136,23 +136,28 @@ public class FactoryServiceTest {
     @InjectMocks
     private FactoryService factoryService;
 
+    @SuppressWarnings("unused")
+    private ApiExceptionMapper apiExceptionMapper;
+    @SuppressWarnings("unused")
+    private EnvironmentFilter  environmentFilter;
+
+    private User user;
+
     @BeforeMethod
     public void setUp() throws Exception {
         final FactoryBuilder factoryBuilder = spy(new FactoryBuilder(new SourceStorageParametersValidator()));
         doNothing().when(factoryBuilder).checkValid(any(FactoryDto.class));
         when(factoryParametersResolverHolder.getFactoryParametersResolvers()).thenReturn(factoryParametersResolvers);
-        when(userManager.getById(anyString())).thenReturn(new UserImpl(null,
-                                                                       null,
-                                                                       JettyHttpServer.ADMIN_USER_NAME,
-                                                                       null,
-                                                                       null));
+        user = new UserImpl(USER_ID, USER_EMAIL, ADMIN_USER_NAME);
+        when(userManager.getById(anyString())).thenReturn(user);
+        when(preferenceManager.find(USER_ID)).thenReturn(ImmutableMap.of("preference", "value"));
     }
 
     @Filter
     public static class EnvironmentFilter implements RequestFilter {
         public void doFilter(GenericContainerRequest request) {
             EnvironmentContext context = EnvironmentContext.getCurrent();
-            context.setSubject(new SubjectImpl(ADMIN_USER_NAME, USER_ID, "token-2323", false));
+            context.setSubject(new SubjectImpl(ADMIN_USER_NAME, USER_ID, ADMIN_USER_PASSWORD, false));
         }
     }
 
@@ -161,7 +166,7 @@ public class FactoryServiceTest {
     @Test
     public void shouldSaveFactoryWithImagesFromFormData() throws Exception {
         final Factory factory = createFactory();
-        final FactoryDto factoryDto = asDto(factory);
+        final FactoryDto factoryDto = asDto(factory, user);
         when(factoryManager.saveFactory(any(FactoryDto.class), anySetOf(FactoryImage.class))).thenReturn(factory);
         when(factoryManager.getById(FACTORY_ID)).thenReturn(factory);
         when(factoryBuilder.build(any(InputStream.class))).thenReturn(factoryDto);
@@ -176,20 +181,23 @@ public class FactoryServiceTest {
                                          .post(SERVICE_PATH);
 
 
-        final FactoryDto responseFactory = getFromResponse(response, FactoryDto.class);
-        final boolean found = responseFactory.getLinks()
-                                             .stream()
-                                             .anyMatch(link -> link.getRel().equals("image")
-                                                               && link.getProduces().equals(FACTORY_IMAGE_MIME_TYPE)
-                                                               && !link.getHref().isEmpty());
-        assertEquals(responseFactory.withLinks(emptyList()), factoryDto);
+        final FactoryDto result = getFromResponse(response, FactoryDto.class);
+        final boolean found = result.getLinks()
+                                    .stream()
+                                    .anyMatch(link -> link.getRel().equals("image")
+                                                      && link.getProduces().equals(FACTORY_IMAGE_MIME_TYPE)
+                                                      && !link.getHref().isEmpty());
+        factoryDto.withLinks(result.getLinks())
+                  .getCreator()
+                  .withCreated(result.getCreator().getCreated());
+        assertEquals(result, factoryDto);
         assertTrue(found);
     }
 
     @Test
     public void shouldSaveFactoryFromFormDataWithoutImages() throws Exception {
         final Factory factory = createFactory();
-        final FactoryDto factoryDto = asDto(factory);
+        final FactoryDto factoryDto = asDto(factory, user);
         when(factoryManager.saveFactory(any(FactoryDto.class), anySetOf(FactoryImage.class))).thenReturn(factory);
         when(factoryBuilder.build(any(InputStream.class))).thenReturn(factoryDto);
 
@@ -201,7 +209,10 @@ public class FactoryServiceTest {
                                          .when()
                                          .post("/private" + SERVICE_PATH);
         final FactoryDto result = getFromResponse(response, FactoryDto.class);
-        assertEquals(result.withLinks(emptyList()), factoryDto);
+        factoryDto.withLinks(result.getLinks())
+                  .getCreator()
+                  .withCreated(result.getCreator().getCreated());
+        assertEquals(result, factoryDto);
     }
 
     @Test
@@ -209,7 +220,7 @@ public class FactoryServiceTest {
         final Factory factory = createFactory();
         when(factoryManager.saveFactory(any(FactoryDto.class), anySetOf(FactoryImage.class))).thenReturn(factory);
         when(factoryManager.getById(FACTORY_ID)).thenReturn(factory);
-        final FactoryDto factoryDto = asDto(factory);
+        final FactoryDto factoryDto = asDto(factory, user);
         when(factoryBuilder.build(any(InputStream.class))).thenReturn(factoryDto);
 
         given().auth()
@@ -250,7 +261,7 @@ public class FactoryServiceTest {
                                          .post("/private" + SERVICE_PATH);
 
         final ServiceError err = getFromResponse(response, ServiceError.class);
-        assertEquals(err.getMessage(), "'factory' section of multipart/form-data required");
+        assertEquals(err.getMessage(), "factory configuration required");
     }
 
     @Test
@@ -274,7 +285,7 @@ public class FactoryServiceTest {
     @Test
     public void shouldSaveFactoryWithoutImages() throws Exception {
         final Factory factory = createFactory();
-        final FactoryDto factoryDto = asDto(factory);
+        final FactoryDto factoryDto = asDto(factory, user);
         when(factoryManager.saveFactory(any(FactoryDto.class))).thenReturn(factory);
 
         final Response response = given().auth()
@@ -305,7 +316,7 @@ public class FactoryServiceTest {
     @Test
     public void shouldReturnFactoryByIdentifierWithoutValidation() throws Exception {
         final Factory factory = createFactory();
-        final FactoryDto factoryDto = asDto(factory);
+        final FactoryDto factoryDto = asDto(factory, user);
         when(factoryManager.getById(FACTORY_ID)).thenReturn(factory);
         when(factoryManager.getFactoryImages(FACTORY_ID)).thenReturn(emptySet());
 
@@ -320,7 +331,7 @@ public class FactoryServiceTest {
     @Test
     public void shouldReturnFactoryByIdentifierWithValidation() throws Exception {
         final Factory factory = createFactory();
-        final FactoryDto factoryDto = asDto(factory);
+        final FactoryDto factoryDto = asDto(factory, user);
         when(factoryManager.getById(FACTORY_ID)).thenReturn(factory);
         when(factoryManager.getFactoryImages(FACTORY_ID)).thenReturn(emptySet());
         doNothing().when(acceptValidator).validateOnAccept(any(FactoryDto.class));
@@ -1393,7 +1404,7 @@ public class FactoryServiceTest {
                           .setId(FACTORY_ID)
                           .setVersion("4.0")
                           .setWorkspace(createWorkspaceConfig(type, location))
-                          .setCreator(new AuthorImpl(12L, ADMIN_USER_NAME, USER_ID, USER_EMAIL))
+                          .setCreator(new AuthorImpl(12L, USER_ID))
                           .build();
     }
 
