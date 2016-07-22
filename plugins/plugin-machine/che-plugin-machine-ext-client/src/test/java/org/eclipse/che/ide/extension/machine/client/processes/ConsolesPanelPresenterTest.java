@@ -18,7 +18,6 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.machine.MachineServiceClient;
-import org.eclipse.che.ide.api.machine.events.DevMachineStateEvent;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
@@ -44,6 +43,7 @@ import org.eclipse.che.ide.extension.machine.client.command.CommandTypeRegistry;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.EntityFactory;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.TerminalFactory;
 import org.eclipse.che.ide.extension.machine.client.machine.Machine;
+import org.eclipse.che.ide.extension.machine.client.machine.MachineStateEvent;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandConsoleFactory;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandOutputConsole;
 import org.eclipse.che.ide.extension.machine.client.perspective.terminal.TerminalPresenter;
@@ -88,39 +88,39 @@ public class ConsolesPanelPresenterTest {
     private static final int    PID            = 101;
 
     @Mock
-    private DtoFactory                          dtoFactory;
+    private DtoFactory                    dtoFactory;
     @Mock
-    private CommandConsoleFactory               commandConsoleFactory;
+    private CommandConsoleFactory         commandConsoleFactory;
     @Mock
-    private CommandTypeRegistry                 commandTypeRegistry;
+    private CommandTypeRegistry           commandTypeRegistry;
     @Mock
-    private DialogFactory                       dialogFactory;
+    private DialogFactory                 dialogFactory;
     @Mock
-    private WorkspaceAgent                      workspaceAgent;
+    private WorkspaceAgent                workspaceAgent;
     @Mock
-    private NotificationManager                 notificationManager;
+    private NotificationManager           notificationManager;
     @Mock
-    private MachineLocalizationConstant         localizationConstant;
+    private MachineLocalizationConstant   localizationConstant;
     @Mock
-    private TerminalFactory                     terminalFactory;
+    private TerminalFactory               terminalFactory;
     @Mock
-    private ConsolesPanelView                   view;
+    private ConsolesPanelView             view;
     @Mock
-    private MachineResources                    resources;
+    private MachineResources              resources;
     @Mock
-    private AppContext                          appContext;
+    private AppContext                    appContext;
     @Mock
-    private MachineServiceClient                machineService;
+    private MachineServiceClient          machineService;
     @Mock
-    private EntityFactory                       entityFactory;
+    private EntityFactory                 entityFactory;
     @Mock
-    private EventBus                            eventBus;
+    private EventBus                      eventBus;
     @Mock
-    private WorkspaceDto                        workspace;
+    private WorkspaceDto                  workspace;
     @Mock
-    private OutputConsole                       outputConsole;
+    private OutputConsole                 outputConsole;
     @Mock
-    private ConsoleTreeContextMenuFactory       consoleTreeContextMenuFactory;
+    private ConsoleTreeContextMenuFactory consoleTreeContextMenuFactory;
 
     @Mock
     private Promise<List<MachineDto>> machinesPromise;
@@ -140,7 +140,7 @@ public class ConsolesPanelPresenterTest {
     @Captor
     private ArgumentCaptor<Operation<MachineDto>>              machineCaptor;
     @Captor
-    private ArgumentCaptor<DevMachineStateEvent.Handler>       devMachineStateHandlerCaptor;
+    private ArgumentCaptor<MachineStateEvent.Handler>          machineStateHandlerCaptor;
     @Captor
     private ArgumentCaptor<Operation<PromiseError>>            errorOperation;
 
@@ -160,7 +160,7 @@ public class ConsolesPanelPresenterTest {
         when(processesPromise.then(Matchers.<Operation<List<MachineProcessDto>>>anyObject())).thenReturn(processesPromise);
         when(commandConsoleFactory.create(anyString())).thenReturn(mock(OutputConsole.class));
 
-        when(appContext.getWorkspaceId()).thenReturn("workspaceID");
+        when(appContext.getWorkspaceId()).thenReturn(WORKSPACE_ID);
 
         presenter =
                 new ConsolesPanelPresenter(view, eventBus, dtoFactory, dialogFactory, entityFactory, terminalFactory, commandConsoleFactory,
@@ -214,7 +214,7 @@ public class ConsolesPanelPresenterTest {
     }
 
     @Test
-    public void shouldFetchMachines() throws Exception {
+    public void shouldFetchMachinesAtCreatingInstanceOfConsolesPanelPresenter() throws Exception {
         MachineDto machineDto = mock(MachineDto.class);
         MachineConfigDto machineConfigDto = mock(MachineConfigDto.class);
         when(machineDto.getConfig()).thenReturn(machineConfigDto);
@@ -223,17 +223,36 @@ public class ConsolesPanelPresenterTest {
         List<MachineDto> machines = new ArrayList<>(2);
         machines.add(machineDto);
 
-        when(appContext.getWorkspaceId()).thenReturn("workspaceID");
-        DevMachineStateEvent devMachineStateEvent = mock(DevMachineStateEvent.class);
-        verify(eventBus, times(5)).addHandler(anyObject(), devMachineStateHandlerCaptor.capture());
-
-        DevMachineStateEvent.Handler devMachineStateHandler = devMachineStateHandlerCaptor.getAllValues().get(0);
-        devMachineStateHandler.onDevMachineStarted(devMachineStateEvent);
-
         verify(machineService).getMachines(eq(WORKSPACE_ID));
         verify(machinesPromise).then(machinesCaptor.capture());
         machinesCaptor.getValue().apply(machines);
         verify(view).setProcessesData(anyObject());
+    }
+
+    @Test
+    public void shouldAddMachineWhenMachineCreating() throws Exception {
+        MachineDto machineDto = mock(MachineDto.class);
+        MachineConfigDto machineConfigDto = mock(MachineConfigDto.class);
+        OutputConsole outputConsole = mock(OutputConsole.class);
+        when(machineDto.getConfig()).thenReturn(machineConfigDto);
+        when(appContext.getWorkspaceId()).thenReturn(WORKSPACE_ID);
+        when(commandConsoleFactory.create("")).thenReturn(outputConsole);
+
+        MachineStateEvent machineStateEvent = mock(MachineStateEvent.class);
+        when(machineStateEvent.getMachine()).thenReturn(machineDto);
+        verify(eventBus, times(4)).addHandler(anyObject(), machineStateHandlerCaptor.capture());
+        MachineStateEvent.Handler machineStateHandler = machineStateHandlerCaptor.getAllValues().get(0);
+        machineStateHandler.onMachineCreating(machineStateEvent);
+
+        verify(outputConsole).go(acceptsOneWidgetCaptor.capture());
+        IsWidget widget = mock(IsWidget.class);
+        acceptsOneWidgetCaptor.getValue().setWidget(widget);
+
+        verify(workspaceAgent).setActivePart(anyObject());
+        verify(commandConsoleFactory).create(eq(""));
+        verify(view).addProcessWidget(anyString(), anyObject());
+        verify(view).selectNode(anyObject());
+        verify(view).setProcessesData(eq(presenter.rootNode));
     }
 
     @Test
@@ -269,7 +288,7 @@ public class ConsolesPanelPresenterTest {
         verify(view, times(2)).selectNode(anyObject());
         verify(view).setProcessesData(anyObject());
         verify(view).getNodeById(anyString());
-        verify(view, times(2)).setStopButtonVisibility(anyString(), anyBoolean());
+        verify(view).setStopButtonVisibility(anyString(), anyBoolean());
     }
 
     @Test
@@ -371,7 +390,7 @@ public class ConsolesPanelPresenterTest {
         verify(terminal).setVisible(eq(true));
         verify(terminal).connect();
         verify(terminal).setListener(anyObject());
-        verify(view, times(3)).setStopButtonVisibility(anyString(), eq(false));
+        verify(view).setStopButtonVisibility(anyString(), eq(false));
     }
 
     @Test
@@ -498,7 +517,7 @@ public class ConsolesPanelPresenterTest {
     }
 
     @Test
-    public void shouldStopProcessWithoutCloseCommanOutput() throws Exception {
+    public void shouldStopProcessWithoutCloseCommandOutput() throws Exception {
         ProcessTreeNode machineNode = mock(ProcessTreeNode.class);
         ProcessTreeNode commandNode = mock(ProcessTreeNode.class);
         when(machineNode.getId()).thenReturn(MACHINE_ID);
@@ -524,7 +543,7 @@ public class ConsolesPanelPresenterTest {
     }
 
     @Test
-    public void shouldCloseCommanOutputWhenCommandHasFinished() throws Exception {
+    public void shouldCloseCommandOutputWhenCommandHasFinished() throws Exception {
         ProcessTreeNode machineNode = mock(ProcessTreeNode.class);
         ProcessTreeNode commandNode = mock(ProcessTreeNode.class);
         when(machineNode.getId()).thenReturn(MACHINE_ID);
