@@ -15,6 +15,12 @@ import org.eclipse.che.api.core.model.machine.MachineSource;
 import org.eclipse.che.api.core.model.machine.Snapshot;
 import org.eclipse.che.commons.lang.NameGenerator;
 
+import javax.persistence.Basic;
+import javax.persistence.Embedded;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import java.util.Objects;
 
 import static java.util.Objects.requireNonNull;
@@ -24,23 +30,52 @@ import static java.util.Objects.requireNonNull;
  *
  * @author Yevhenii Voevodin
  */
+@Entity(name = "Snapshot")
+@NamedQueries(
+        @NamedQuery(name = "Snapshot.getByMachine",
+                    query = "SELECT snapshot " +
+                            "FROM Snapshot snapshot " +
+                            "WHERE snapshot.workspaceId = :workspaceId" +
+                            "  AND snapshot.envName     = :envName" +
+                            "  AND snapshot.machineName = :machineName")
+)
 public class SnapshotImpl implements Snapshot {
 
     public static SnapshotBuilder builder() {
         return new SnapshotBuilder();
     }
 
-    private final String  workspaceId;
-    private final String  machineName;
-    private final String  envName;
-    private final String  id;
-    private final String  type;
-    private final String  namespace;
-    private final boolean isDev;
-    private final long    creationDate;
+    @Id
+    private String id;
 
-    private String          description;
+    @Basic
+    private String workspaceId;
+
+    @Basic
+    private String machineName;
+
+    @Basic
+    private String envName;
+
+    @Basic
+    private String type;
+
+    @Basic
+    private String namespace;
+
+    @Basic
+    private boolean isDev;
+
+    @Basic
+    private long creationDate;
+
+    @Basic
+    private String description;
+
+    @Embedded
     private MachineSourceImpl machineSource;
+
+    public SnapshotImpl() {}
 
     public SnapshotImpl(Snapshot snapshot) {
         this(snapshot.getId(),
@@ -192,16 +227,16 @@ public class SnapshotImpl implements Snapshot {
      */
     public static class SnapshotBuilder {
 
-        private String      workspaceId;
-        private String      machineName;
-        private String      envName;
-        private String      id;
-        private String      type;
-        private String      namespace;
-        private String      description;
+        private String        workspaceId;
+        private String        machineName;
+        private String        envName;
+        private String        id;
+        private String        type;
+        private String        namespace;
+        private String        description;
         private MachineSource machineSource;
-        private boolean     isDev;
-        private long        creationDate;
+        private boolean       isDev;
+        private long          creationDate;
 
         public SnapshotBuilder fromConfig(MachineConfig machineConfig) {
             machineName = machineConfig.getName();
@@ -270,7 +305,8 @@ public class SnapshotImpl implements Snapshot {
         }
 
         public SnapshotImpl build() {
-            return new SnapshotImpl(id, type, machineSource, namespace, creationDate, workspaceId, description, isDev, machineName, envName);
+            return new SnapshotImpl(id, type, machineSource, namespace, creationDate, workspaceId, description, isDev, machineName,
+                                    envName);
         }
     }
 }
