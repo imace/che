@@ -189,21 +189,22 @@ public class WorkspaceServiceClientImpl implements WorkspaceServiceClient {
     }
 
     @Override
-    public Promise<WorkspaceDto> startById(@NotNull final String id, final String envName) {
+    public Promise<WorkspaceDto> startById(@NotNull final String id, final String envName, final boolean isRestore) {
         return newPromise(new RequestCall<WorkspaceDto>() {
             @Override
             public void makeCall(AsyncCallback<WorkspaceDto> callback) {
-                startById(id, envName, callback);
+                startById(id, envName, isRestore, callback);
             }
         });
     }
 
     private void startById(@NotNull String workspaceId,
                            @Nullable String envName,
+                           @Nullable boolean isRestore,
                            @NotNull AsyncCallback<WorkspaceDto> callback) {
-        String url = baseHttpUrl + "/" + workspaceId + "/runtime";
+        String url = baseHttpUrl + "/" + workspaceId + "/runtime?restore=" + isRestore;
         if (envName != null) {
-            url += "?environment=" + envName;
+            url += "&environment=" + envName;
         }
         asyncRequestFactory.createPostRequest(url, null)
                            .header(ACCEPT, APPLICATION_JSON)
@@ -378,20 +379,6 @@ public class WorkspaceServiceClientImpl implements WorkspaceServiceClient {
                                    .header(ACCEPT, APPLICATION_JSON)
                                    .loader(loaderFactory.newLoader("Creating workspace's snapshot"))
                                    .send(newCallback(callback));
-            }
-        });
-    }
-
-    @Override
-    public Promise<WorkspaceDto> recoverWorkspace(final String workspaceId, final String envName, final String accountId) {
-        return newPromise(new RequestCall<WorkspaceDto>() {
-            @Override
-            public void makeCall(AsyncCallback<WorkspaceDto> callback) {
-                final String url = baseHttpUrl + '/' + workspaceId + "/runtime/snapshot?environment=" + envName;
-                asyncRequestFactory.createPostRequest(url, null)
-                                   .header(ACCEPT, APPLICATION_JSON)
-                                   .loader(loaderFactory.newLoader("Recovering workspace from snapshot"))
-                                   .send(newCallback(callback, dtoUnmarshallerFactory.newUnmarshaller(WorkspaceDto.class)));
             }
         });
     }

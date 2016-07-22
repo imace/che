@@ -352,6 +352,12 @@ public class WorkspaceManager {
      * @param accountId
      *         account which should be used for this runtime workspace or null when
      *         it should be automatically detected
+     * @param isRestore
+     *         if <code>true</code> workspace will be restored from snapshot if snapshot exists,
+     *         if <code>false</code> workspace will not be restored from snapshot
+     *         even if auto-restore is enabled and snapshot exists,
+     *         if <code>null</code> workspace will be restored from snapshot
+     *         only if auto-restore is enabled and snapshot exists
      * @return starting workspace
      * @throws NullPointerException
      *         when {@code workspaceId} is null
@@ -363,15 +369,16 @@ public class WorkspaceManager {
      */
     public WorkspaceImpl startWorkspace(String workspaceId,
                                         @Nullable String envName,
-                                        @Nullable String accountId) throws NotFoundException,
-                                                                           ServerException,
-                                                                           ConflictException {
+                                        @Nullable String accountId,
+                                        @Nullable Boolean isRestore) throws NotFoundException,
+                                                                            ServerException,
+                                                                            ConflictException {
         requireNonNull(workspaceId, "Required non-null workspace id");
         final WorkspaceImpl workspace = workspaceDao.get(workspaceId);
         final String restoreAttr = workspace.getAttributes().get(AUTO_RESTORE_FROM_SNAPSHOT);
         final boolean autoRestore = restoreAttr == null ? defaultAutoRestore : parseBoolean(restoreAttr);
         final boolean snapshotExists = !getSnapshot(workspaceId).isEmpty();
-        return performAsyncStart(workspace, envName, snapshotExists && autoRestore, accountId);
+        return performAsyncStart(workspace, envName, (isRestore == null ? autoRestore : isRestore) && snapshotExists, accountId);
     }
 
     /**
@@ -408,38 +415,6 @@ public class WorkspaceManager {
                                                           accountId);
         performAsyncStart(workspace, workspace.getConfig().getDefaultEnv(), false, accountId);
         return normalizeState(workspace);
-    }
-
-    /**
-     * Asynchronously recovers the workspace from the snapshot.
-     *
-     * @param workspaceId
-     *         workspace id
-     * @param envName
-     *         environment name or null if default one should be used
-     * @param accountId
-     *         account which should be used for this runtime workspace or null when
-     *         it should be automatically detected
-     * @return starting workspace instance
-     * @throws NullPointerException
-     *         when {@code workspaceId} is null
-     * @throws NotFoundException
-     *         when workspace with such id doesn't exist
-     * @throws ServerException
-     *         when any server error occurs
-     * @throws ConflictException
-     *         when workspace with such id is not stopped
-     * @throws ForbiddenException
-     *         when user doesn't have access to start the new workspace
-     */
-    public WorkspaceImpl recoverWorkspace(String workspaceId,
-                                          @Nullable String envName,
-                                          @Nullable String accountId) throws NotFoundException,
-                                                                             ServerException,
-                                                                             ConflictException,
-                                                                             ForbiddenException {
-        requireNonNull(workspaceId, "Required non-null workspace id");
-        return performAsyncStart(workspaceDao.get(workspaceId), envName, true, accountId);
     }
 
     /**
