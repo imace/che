@@ -116,7 +116,7 @@ class PlainJavaPagePresenter extends AbstractWizardPage<MutableProjectConfig> im
         List<String> nodeRelativePath = new LinkedList<>();
 
         for (Node node : nodes) {
-            nodeRelativePath.add(((ResourceNode)node).getData().getLocation().toString().substring(projectNameLength + 1));
+            nodeRelativePath.add(((ResourceNode)node).getData().getLocation().toString().substring(projectNameLength + 2));
         }
 
         if (isSourceSelected) {
