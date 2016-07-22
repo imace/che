@@ -378,7 +378,7 @@ public class WorkspaceManager {
         final String restoreAttr = workspace.getAttributes().get(AUTO_RESTORE_FROM_SNAPSHOT);
         final boolean autoRestore = restoreAttr == null ? defaultAutoRestore : parseBoolean(restoreAttr);
         final boolean snapshotExists = !getSnapshot(workspaceId).isEmpty();
-        return performAsyncStart(workspace, envName, (isRestore == null ? autoRestore : isRestore) && snapshotExists, accountId);
+        return performAsyncStart(workspace, envName, firstNonNull(isRestore, autoRestore) && snapshotExists, accountId);
     }
 
     /**
